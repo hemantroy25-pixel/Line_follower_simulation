@@ -1,0 +1,4582 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Farm Bot | Interactive Robotics Simulation</title>
+  <style>
+/* ==========================================================================
+   SMART FARM BOT - STANDALONE ROBOTICS SIMULATION STYLESHEET
+   Agricultural Green (#10b981 / #22c55e), Deep Soil / Void (#080c14, #0f172a),
+   Cyber Cyan (#06b6d4 / #38bdf8), Warning Amber (#f59e0b), E-Stop Red (#ef4444)
+   ========================================================================== */
+
+:root {
+  --bg-primary: #080c14;
+  --bg-secondary: #0f172a;
+  --bg-card: rgba(15, 23, 42, 0.78);
+  --bg-card-border: rgba(30, 41, 59, 0.9);
+  --bg-card-hover: rgba(30, 41, 59, 0.6);
+  --bg-elevated: #1e293b;
+
+  --accent-green: #10b981;
+  --accent-green-bright: #34d399;
+  --accent-green-glow: rgba(16, 185, 129, 0.25);
+  
+  --accent-cyan: #06b6d4;
+  --accent-cyan-bright: #38bdf8;
+  --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-red-glow: rgba(239, 68, 68, 0.35);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+    linear-gradient(rgba(15, 23, 42, 0.8) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.8) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+/* TOP COCKPIT HEADER */
+.cockpit-header {
+  background: rgba(11, 17, 32, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bg-card-border);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.brand-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffffff;
+}
+
+.brand-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green-bright);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.header-status-strip {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.status-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--bg-card-border);
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  box-shadow: 0 0 8px currentColor;
+}
+
+.status-dot.connected {
+  background-color: var(--accent-green-bright);
+  color: var(--accent-green-bright);
+  animation: pulseDot 2s infinite;
+}
+
+.status-dot.running {
+  background-color: var(--accent-cyan-bright);
+  color: var(--accent-cyan-bright);
+  animation: pulseDot 1.2s infinite;
+}
+
+.status-dot.line-lost {
+  background-color: var(--accent-amber);
+  color: var(--accent-amber);
+  animation: pulseDot 0.8s infinite;
+}
+
+.status-dot.estop, .status-dot.error {
+  background-color: var(--accent-red);
+  color: var(--accent-red);
+  animation: pulseDot 0.5s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.15); }
+}
+
+.status-pill {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.pill-idle { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+.pill-running { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan-bright); border: 1px solid rgba(6, 182, 212, 0.4); }
+.pill-paused { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.4); }
+.pill-linelost { background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5); }
+.pill-completed { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); }
+.pill-estop { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.6); }
+.pill-error { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.6); }
+
+.header-quick-telemetry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.power-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #38bdf8;
+}
+
+.battery-bar-wrap {
+  width: 44px;
+  height: 10px;
+  border: 1px solid #38bdf8;
+  border-radius: 3px;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.battery-bar-fill {
+  height: 100%;
+  width: 85%;
+  background: #38bdf8;
+  border-radius: 1px;
+}
+
+.back-home-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+.back-home-link:hover {
+  color: #ffffff;
+  border-color: var(--accent-green-bright);
+}
+
+/* MAIN DASHBOARD GRID LAYOUT */
+.cockpit-container {
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 16px 20px 40px;
+  display: grid;
+  grid-template-columns: 820px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1400px) {
+  .cockpit-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.arena-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+}
+
+/* SCENARIO SELECTOR BAR */
+.scenario-selector-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+}
+
+.scenario-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--accent-green-bright);
+  margin-right: 4px;
+}
+
+.scenario-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.scenario-btn:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #ffffff;
+  border-color: var(--accent-green-bright);
+}
+
+.scenario-btn.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(6, 182, 212, 0.25) 100%);
+  color: #ffffff;
+  border-color: var(--accent-green-bright);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
+.scenario-description-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+/* 2D CANVAS ARENA */
+.canvas-wrapper {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), 0 8px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2d3748;
+}
+
+#farmCanvas {
+  display: block;
+  width: 100%;
+  height: 520px;
+  background-color: #1e1610;
+  cursor: crosshair;
+}
+
+.canvas-controls-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.overlay-tool-btn {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+
+.overlay-tool-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  color: #ffffff;
+}
+
+.overlay-tool-btn.active {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--accent-green-bright);
+  color: var(--accent-green-bright);
+}
+
+.canvas-hud-bottom {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.hud-pill {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: #94a3b8;
+}
+
+/* CONTROL DOCK */
+.control-dock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bg-card-border);
+}
+
+.action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ctrl-btn-start {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+}
+.ctrl-btn-start:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.55);
+}
+
+.ctrl-btn-pause {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(71, 85, 105, 0.8);
+  color: #f1f5f9;
+}
+.ctrl-btn-pause:hover { background: #475569; }
+
+.ctrl-btn-stop {
+  background: rgba(71, 85, 105, 0.6);
+  border-color: rgba(100, 116, 139, 0.5);
+  color: #f1f5f9;
+}
+.ctrl-btn-stop:hover { background: #334155; }
+
+.ctrl-btn-reset {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #cbd5e1;
+}
+.ctrl-btn-reset:hover { background: #334155; color: #ffffff; }
+
+.ctrl-btn-estop {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #ffffff;
+  border-color: #f87171;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+.ctrl-btn-estop:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(239, 68, 68, 0.65);
+}
+
+.speed-control-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.speed-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.speed-slider-wrap input[type="range"] {
+  accent-color: var(--accent-green-bright);
+  cursor: pointer;
+  width: 90px;
+}
+
+.multiplier-btns {
+  display: flex;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.multiplier-btn {
+  background: rgba(30, 41, 59, 0.7);
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.multiplier-btn.active {
+  background: var(--accent-green);
+  color: #ffffff;
+}
+
+/* TELEMETRY & SENSOR STRIPS */
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.telemetry-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.telemetry-card-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.telemetry-card-val {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #ffffff;
+}
+
+.telemetry-card-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.sensor-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.sensor-tile {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+
+.sensor-tile.active-line {
+  border-color: var(--accent-green-bright);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.sensor-tile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sensor-tile-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.sensor-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #475569;
+}
+
+.sensor-indicator-dot.active {
+  background-color: var(--accent-green-bright);
+  box-shadow: 0 0 8px var(--accent-green-bright);
+}
+
+.sensor-tile-reading {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #38bdf8;
+}
+
+.sensor-tile-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.distance-meter-bar {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.distance-meter-fill {
+  height: 100%;
+  background: #38bdf8;
+  transition: width 0.1s linear, background-color 0.2s;
+}
+
+.distance-meter-fill.danger {
+  background: #ef4444;
+}
+
+/* DIAGNOSTIC SUITE TABS */
+.diagnostic-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tabs-nav-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid var(--bg-card-border);
+  padding-bottom: 8px;
+}
+
+.tab-btn {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover { background: rgba(51, 65, 85, 0.7); color: #ffffff; }
+.tab-btn.active {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: var(--accent-green);
+  color: var(--accent-green-bright);
+}
+
+.tab-content { display: none; }
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* TAB 1: PIPELINE */
+.pipeline-container { display: flex; flex-direction: column; gap: 14px; }
+.pipeline-decision-banner {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  border-left: 4px solid var(--accent-green-bright);
+}
+
+.pipeline-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.pipeline-banner-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.decision-badge {
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+.badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+.badge-danger  { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+.badge-idle    { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid #64748b; }
+.badge-complete{ background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #0284c7; }
+
+.pipeline-explanation-text { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+
+.pipeline-chain-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  position: relative;
+}
+
+@media (max-width: 1200px) {
+  .pipeline-chain-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.pipeline-stage-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 10px 8px;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.pipeline-stage-box.active {
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.1);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+}
+
+.pipeline-stage-icon { font-size: 18px; margin-bottom: 4px; }
+.pipeline-stage-name { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; }
+.pipeline-stage-val { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: #ffffff; word-break: break-word; }
+.pipeline-stage-sub { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+.pipeline-stage-arrow {
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-green-bright);
+  font-size: 12px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* TAB 2: HARDWARE BLOCK DIAGRAM */
+.hw-diagram-container {
+  width: 100%;
+  height: 480px;
+  background: rgba(11, 17, 32, 0.9);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.hw-svg-canvas { width: 100%; height: 100%; }
+.hw-node { cursor: pointer; transition: transform 0.15s, filter 0.15s; }
+.hw-node:hover { filter: brightness(1.2); }
+.hw-node-rect { stroke-width: 1.5; }
+.hw-wire { fill: none; stroke-width: 2; stroke-dasharray: 4, 4; }
+.hw-wire-active { animation: wireDash 1s linear infinite; }
+@keyframes wireDash { to { stroke-dashoffset: -16; } }
+
+/* TAB 3: ESP32 PINOUT */
+.esp32-visual-wrapper {
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.esp32-board-layout {
+  display: grid;
+  grid-template-columns: 220px 240px 220px;
+  justify-content: center;
+  align-items: stretch;
+  gap: 16px;
+  min-width: 680px;
+}
+
+.esp-pin-header { display: flex; flex-direction: column; gap: 6px; }
+
+.esp-pin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 8px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.esp-pin-row.active-pin { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green-bright); }
+.esp-pin-row.active-pwm { background: rgba(6, 182, 212, 0.2); border-color: var(--accent-cyan-bright); }
+.esp-pin-row.active-warn { background: rgba(245, 158, 11, 0.2); border-color: var(--accent-amber); }
+
+.esp-pin-label { font-weight: 700; color: #e2e8f0; }
+.esp-pin-target { font-size: 9px; color: #94a3b8; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.esp-pin-led { width: 7px; height: 7px; border-radius: 50%; background: #475569; }
+.esp-pin-led.led-green { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.esp-pin-led.led-cyan  { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; }
+.esp-pin-led.led-amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+.esp-pin-led.led-red   { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+.esp-board-center {
+  background: #0d1527;
+  border: 2px solid #1e293b;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+.esp-wroom-chip {
+  width: 140px;
+  height: 110px;
+  background: #94a3b8;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.esp-wroom-title { font-size: 13px; font-weight: 800; color: #0f172a; }
+.esp-wroom-sub { font-size: 9px; color: #334155; letter-spacing: 0.5px; }
+
+/* TAB 4: L298N DRIVER */
+.l298n-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.l298n-card { background: rgba(15, 23, 42, 0.75); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 14px; }
+.motor-tachometer-wrap { display: flex; align-items: center; justify-content: space-around; margin: 12px 0; }
+.tach-gauge { text-align: center; }
+.tach-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #1e293b;
+  border-top-color: var(--accent-green-bright);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 6px;
+}
+.tach-rpm-num { font-size: 18px; font-weight: 800; font-family: var(--font-mono); color: #ffffff; }
+.tach-rpm-unit { font-size: 9px; color: var(--text-muted); }
+.logic-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: var(--font-mono); margin-top: 10px; }
+.logic-table th, .logic-table td { padding: 4px 8px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.08); }
+.logic-table th { background: rgba(30, 41, 59, 0.6); color: var(--text-muted); }
+
+/* TAB 5: OOP ARCHITECTURE */
+.oop-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+  .oop-layout-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.oop-class-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.oop-class-card.active-call {
+  border-color: var(--accent-green-bright);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.oop-class-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.oop-class-name { font-size: 13px; font-weight: 800; font-family: var(--font-mono); color: var(--accent-cyan-bright); }
+.oop-sub-list { font-size: 10px; font-family: var(--font-mono); display: flex; flex-direction: column; gap: 4px; }
+.oop-sub-item { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px; border-radius: 3px; }
+.oop-sub-item.active-method { background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 700; }
+
+.oop-call-trace-box {
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.oop-trace-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.trace-item { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.trace-time { color: var(--text-muted); font-size: 10px; }
+.trace-class { color: var(--accent-cyan-bright); font-weight: 700; }
+.trace-method { color: var(--accent-green-bright); }
+.trace-params { color: #cbd5e1; font-size: 10px; }
+
+/* TAB 6: FLOWCHART */
+.flowchart-wrapper {
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  height: 480px;
+  overflow: auto;
+}
+
+.fc-svg { width: 100%; height: 100%; min-height: 440px; }
+.fc-node { transition: all 0.2s; }
+.fc-node-rect { fill: #1e293b; stroke: #475569; stroke-width: 1.5; transition: all 0.2s; }
+.fc-node.active-fc-node .fc-node-rect {
+  fill: rgba(16, 185, 129, 0.35);
+  stroke: var(--accent-green-bright);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.7));
+}
+.fc-node-text { font-size: 11px; font-family: var(--font-sans); fill: #f8fafc; text-anchor: middle; dominant-baseline: central; }
+.fc-connector { stroke: #475569; stroke-width: 1.5; fill: none; }
+
+/* TAB 7: EVENT LOG */
+.event-log-container { display: flex; flex-direction: column; gap: 10px; }
+.log-actions-bar { display: flex; justify-content: space-between; align-items: center; }
+.log-filter-select {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--bg-card-border);
+  color: #cbd5e1;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+.log-stream-box {
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  height: 380px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.log-row { display: flex; align-items: flex-start; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.log-time { color: var(--text-muted); font-size: 10px; min-width: 55px; }
+.log-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+.badge-info { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.badge-action { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.badge-warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.badge-alarm { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.log-message { color: #cbd5e1; flex: 1; word-break: break-word; }
+
+/* MODAL OVERLAY */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-card {
+  background: #0f172a;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-title { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+.modal-category { font-size: 11px; color: var(--accent-green-bright); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+.modal-desc { font-size: 13px; color: #cbd5e1; margin-bottom: 16px; line-height: 1.5; }
+.modal-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+  background: rgba(30, 41, 59, 0.5);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.modal-details-item small { display: block; color: var(--text-muted); font-size: 10px; text-transform: uppercase; }
+.modal-details-item strong { color: #f1f5f9; }
+.modal-connections-list {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: #090e1a;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+  </style>
+</head>
+<body>
+
+  <!-- TOP COCKPIT HEADER -->
+  <header class="cockpit-header">
+    <div class="brand-block">
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          <span>SMART FARM BOT</span>
+          <span class="brand-tag">v2.4 SIM</span>
+        </div>
+        <div class="brand-subtitle">Object-Oriented Agricultural Navigation System (ESP32 + L298N)</div>
+      </div>
+    </div>
+
+    <div class="header-status-strip">
+      <a href="index.html" class="back-home-link">← Main Website</a>
+
+      <div class="status-badge-item">
+        <span class="status-dot connected" id="headerConnDot"></span>
+        <span>ESP32 MCU: <strong>CONNECTED</strong></span>
+      </div>
+
+      <div class="status-badge-item">
+        <span>STATUS:</span>
+        <span class="status-pill pill-idle" id="headerRobotStatus">IDLE</span>
+      </div>
+
+      <div class="header-quick-telemetry">
+        <div class="power-indicator" title="Li-ion Battery Voltage">
+          <div class="battery-bar-wrap"><div class="battery-bar-fill" id="headerBatFill"></div></div>
+          <span>11.1V (84%)</span>
+        </div>
+        <div title="LM2596 Regulated Voltage">
+          <span style="color: var(--accent-green-bright);">5.02V Reg</span>
+        </div>
+        <div title="System Current Draw">
+          <span style="color: var(--text-muted);" id="headerCurrentDraw">0.12 A</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN COCKPIT CONTAINER -->
+  <main class="cockpit-container">
+
+    <!-- LEFT COLUMN: 2D AGRICULTURAL ARENA -->
+    <section class="arena-column">
+      <!-- Scenario Selector Bar -->
+      <div class="scenario-selector-bar">
+        <span class="scenario-label">SCENARIOS:</span>
+        <button class="scenario-btn active" data-scenario="1">1. Straight Path</button>
+        <button class="scenario-btn" data-scenario="2">2. Left 90° Turn</button>
+        <button class="scenario-btn" data-scenario="3">3. Right 90° Turn</button>
+        <button class="scenario-btn" data-scenario="4">4. Line Lost & Recovery</button>
+        <button class="scenario-btn" data-scenario="5">5. Obstacle Detected</button>
+        <button class="scenario-btn" data-scenario="6">6. Complete Farm Route</button>
+      </div>
+      <div class="scenario-description-text" id="scenarioDescription">
+        Scenario 1: Straight Agricultural Row - Robot traverses a straight furrow path between two rows of vegetables. Both IR sensors detect the line simultaneously to drive forward with balanced PWM.
+      </div>
+
+      <!-- 2D Canvas Arena -->
+      <div class="canvas-wrapper">
+        <canvas id="farmCanvas" width="800" height="520"></canvas>
+
+        <div class="canvas-controls-overlay">
+          <button class="overlay-tool-btn active" id="toggleBeamsBtn" title="Toggle IR Optical Sensor Ground Beams">
+            <span>📡</span> IR Beams
+          </button>
+          <button class="overlay-tool-btn active" id="toggleConeBtn" title="Toggle HC-SR04 Ultrasonic Distance Cone">
+            <span>🔊</span> Ultrasonic Cone
+          </button>
+          <button class="overlay-tool-btn" id="toggleAvoidanceBtn" title="Enable Autonomous Obstacle Avoidance Braking">
+            <span>🛑</span> Avoidance Brake: OFF
+          </button>
+          <button class="overlay-tool-btn" id="canvasResetPoseBtn" title="Reset Robot to Scenario Start">
+            <span>↺</span> Reset Bot
+          </button>
+        </div>
+
+        <div class="canvas-hud-bottom">
+          <div class="hud-pill" id="hudCoords">POS: (100, 260) | HEADING: 0°</div>
+          <div class="hud-pill" id="hudUltrasonic">HC-SR04: 250 cm (Clear)</div>
+          <div class="hud-pill">FIELD: 8.0m × 5.2m (1px ≈ 1cm)</div>
+        </div>
+      </div>
+
+      <!-- Control Dock -->
+      <div class="control-dock">
+        <div class="action-btn-group">
+          <button class="ctrl-btn ctrl-btn-start" id="btnStart">
+            <span>▶</span> START
+          </button>
+          <button class="ctrl-btn ctrl-btn-pause" id="btnPause" disabled>
+            <span>⏸</span> PAUSE
+          </button>
+          <button class="ctrl-btn ctrl-btn-stop" id="btnStop" disabled>
+            <span>⏹</span> STOP
+          </button>
+          <button class="ctrl-btn ctrl-btn-reset" id="btnReset">
+            <span>↺</span> RESET
+          </button>
+          <button class="ctrl-btn ctrl-btn-estop" id="btnEStop">
+            <span>⚠️</span> E-STOP
+          </button>
+        </div>
+
+        <div class="speed-control-group">
+          <div class="speed-slider-wrap">
+            <span>BASE MOTOR PWM:</span>
+            <input type="range" id="pwmSlider" min="100" max="255" value="180" step="5" />
+            <strong id="pwmSliderVal" style="font-family: var(--font-mono); color: #ffffff;">180</strong>
+          </div>
+
+          <div class="multiplier-btns">
+            <button class="multiplier-btn active" data-speed="1">1×</button>
+            <button class="multiplier-btn" data-speed="2">2×</button>
+            <button class="multiplier-btn" data-speed="5">5×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Readouts -->
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <div class="telemetry-card-title">Coordinates <span>(X, Y)</span></div>
+          <div class="telemetry-card-val" id="telemetryPos">100, 260</div>
+          <div class="telemetry-card-sub" id="telemetryDist">Dist: 0.00 m</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-card-title">Heading <span>(Angle)</span></div>
+          <div class="telemetry-card-val" id="telemetryHeading">0.0°</div>
+          <div class="telemetry-card-sub" id="telemetryCompass">East (Furrow Axis)</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-card-title">Speed <span>(cm/s)</span></div>
+          <div class="telemetry-card-val" id="telemetrySpeed">0.0 cm/s</div>
+          <div class="telemetry-card-sub" id="telemetryState">Motors Stopped</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-card-title">Run Time <span>(Clock)</span></div>
+          <div class="telemetry-card-val" id="telemetryTime">00:00.0</div>
+          <div class="telemetry-card-sub">Loop: 60 Hz Active</div>
+        </div>
+      </div>
+
+      <!-- Live Sensor Dashboard Strip -->
+      <div class="sensor-dashboard-grid">
+        <div class="sensor-tile" id="tileLeftIR">
+          <div class="sensor-tile-head">
+            <span class="sensor-tile-name">Left IR Sensor (GPIO 34)</span>
+            <span class="sensor-indicator-dot" id="dotLeftIR"></span>
+          </div>
+          <div class="sensor-tile-reading" id="valLeftIR">SOIL (0)</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <small style="color: var(--text-muted);" id="adcLeftIR">ADC: 380</small>
+            <span class="sensor-tile-badge">PRIMARY NAV</span>
+          </div>
+        </div>
+
+        <div class="sensor-tile" id="tileRightIR">
+          <div class="sensor-tile-head">
+            <span class="sensor-tile-name">Right IR Sensor (GPIO 35)</span>
+            <span class="sensor-indicator-dot" id="dotRightIR"></span>
+          </div>
+          <div class="sensor-tile-reading" id="valRightIR">SOIL (0)</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <small style="color: var(--text-muted);" id="adcRightIR">ADC: 395</small>
+            <span class="sensor-tile-badge">PRIMARY NAV</span>
+          </div>
+        </div>
+
+        <div class="sensor-tile" id="tileUltrasonic">
+          <div class="sensor-tile-head">
+            <span class="sensor-tile-name">HC-SR04 Ultrasonic (GPIO 5/18)</span>
+            <span class="sensor-tile-badge" id="badgeUltrasonic">MONITORING</span>
+          </div>
+          <div class="sensor-tile-reading" id="valUltrasonic">250.0 cm</div>
+          <div class="distance-meter-bar">
+            <div class="distance-meter-fill" id="meterFillUltrasonic" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="sensor-tile">
+          <div class="sensor-tile-head">
+            <span class="sensor-tile-name">DHT11 Climate (GPIO 4)</span>
+            <span class="sensor-tile-badge">EXTENSION</span>
+          </div>
+          <div class="sensor-tile-reading" id="valDHT11" style="color: #34d399;">24.4°C | 62.8%</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Ambient Field Microclimate</div>
+        </div>
+
+        <div class="sensor-tile">
+          <div class="sensor-tile-head">
+            <span class="sensor-tile-name">LDR & Soil (VP/VN ADC)</span>
+            <span class="sensor-tile-badge">EXTENSION</span>
+          </div>
+          <div class="sensor-tile-reading" id="valLdrSoil" style="color: #fbbf24;">840 Lux | 39.2% H2O</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Solar Irradiance & Loam Hydration</div>
+        </div>
+
+        <div class="sensor-tile">
+          <div class="sensor-tile-head">
+            <span class="sensor-tile-name">NEO-6M GPS (UART2)</span>
+            <span class="sensor-tile-badge">EXTENSION</span>
+          </div>
+          <div class="sensor-tile-reading" id="valGPS" style="font-size: 13px; color: #38bdf8;">12°58'23"N 77°35'45"E</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Sector 4B • 9 Satellites • 3D Fix</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: DIAGNOSTIC SUITES -->
+    <section class="diagnostic-column">
+      <div class="panel-card" style="height: 100%;">
+        <div class="tabs-nav-bar">
+          <button class="tab-btn active" data-tab="tabInsideRobot"><span>🔍</span> Inside the Robot</button>
+          <button class="tab-btn" data-tab="tabHwArchitecture"><span>📐</span> Hardware Architecture</button>
+          <button class="tab-btn" data-tab="tabESP32Pinout"><span>⚡</span> ESP32 Pinout</button>
+          <button class="tab-btn" data-tab="tabL298NDriver"><span>⚙️</span> L298N Driver</button>
+          <button class="tab-btn" data-tab="tabOOPArchitecture"><span>🧩</span> OOP Architecture</button>
+          <button class="tab-btn" data-tab="tabFlowchart"><span>🔄</span> Flowchart</button>
+          <button class="tab-btn" data-tab="tabEventLog"><span>📋</span> Event Log</button>
+        </div>
+
+        <!-- TAB 1: INSIDE THE ROBOT -->
+        <div class="tab-content active" id="tabInsideRobot">
+          <div class="pipeline-container">
+            <div class="pipeline-decision-banner">
+              <div class="pipeline-banner-top">
+                <span class="pipeline-banner-title">ACTIVE CONTROLLER DECISION</span>
+                <span class="decision-badge badge-idle" id="pipeDecisionBadge">IDLE</span>
+              </div>
+              <p class="pipeline-explanation-text" id="pipeExplanationText">
+                Robot is in standby mode awaiting user start instruction.
+              </p>
+            </div>
+
+            <div class="pipeline-chain-grid">
+              <div class="pipeline-stage-box" id="pStage1">
+                <div class="pipeline-stage-icon">📡</div>
+                <div class="pipeline-stage-name">1. IR Sensors</div>
+                <div class="pipeline-stage-val" id="pStage1Val">L: 0 | R: 0</div>
+                <div class="pipeline-stage-sub" id="pStage1Sub">Optical Phototransistors</div>
+                <span class="pipeline-stage-arrow">→</span>
+              </div>
+              <div class="pipeline-stage-box" id="pStage2">
+                <div class="pipeline-stage-icon">📡</div>
+                <div class="pipeline-stage-name">2. ESP32 MCU</div>
+                <div class="pipeline-stage-val" id="pStage2Val">GPIO 34/35</div>
+                <div class="pipeline-stage-sub" id="pStage2Sub">Sampled at 60 Hz</div>
+                <span class="pipeline-stage-arrow">→</span>
+              </div>
+              <div class="pipeline-stage-box active" id="pStage3">
+                <div class="pipeline-stage-icon">🧠</div>
+                <div class="pipeline-stage-name">3. Decision</div>
+                <div class="pipeline-stage-val" id="pStage3Val">IDLE</div>
+                <div class="pipeline-stage-sub" id="pStage3Sub">Truth Table Logic</div>
+                <span class="pipeline-stage-arrow">→</span>
+              </div>
+              <div class="pipeline-stage-box" id="pStage4">
+                <div class="pipeline-stage-icon">⚡</div>
+                <div class="pipeline-stage-name">4. L298N Driver</div>
+                <div class="pipeline-stage-val" id="pStage4Val">ENA: 0 | ENB: 0</div>
+                <div class="pipeline-stage-sub" id="pStage4Sub">H-Bridge Switching</div>
+                <span class="pipeline-stage-arrow">→</span>
+              </div>
+              <div class="pipeline-stage-box" id="pStage5">
+                <div class="pipeline-stage-icon">⚙️</div>
+                <div class="pipeline-stage-name">5. DC Motors</div>
+                <div class="pipeline-stage-val" id="pStage5Val">0 RPM | 0 RPM</div>
+                <div class="pipeline-stage-sub" id="pStage5Sub">Torque Delivery</div>
+                <span class="pipeline-stage-arrow">→</span>
+              </div>
+              <div class="pipeline-stage-box" id="pStage6">
+                <div class="pipeline-stage-icon">🔄</div>
+                <div class="pipeline-stage-name">6. Field Motion</div>
+                <div class="pipeline-stage-val" id="pStage6Val">v = 0.0 cm/s</div>
+                <div class="pipeline-stage-sub" id="pStage6Sub">Differential Drive</div>
+              </div>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 14px; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+              <strong style="color: #cbd5e1; display: block; margin-bottom: 6px;">How the Embedded Navigation Control Works:</strong>
+              The Smart Farm Bot follows an agricultural navigation track using optical contrast:
+              <ul style="margin-left: 18px; margin-top: 4px;">
+                <li><strong>Line Detection:</strong> The black rubber/paint line absorbs infrared photons, returning low reflection (Digital 1). The lighter surrounding soil reflects IR strongly back to the phototransistor (Digital 0).</li>
+                <li><strong>Centering Rule:</strong> When both sensors read 1, the bot is centered on the path and both motors drive at equal PWM.</li>
+                <li><strong>Differential Steering:</strong> If the bot drifts right, the right sensor departs the line into soil (Left=1, Right=0). The ESP32 immediately slows the left motor and maintains high PWM on the right motor, creating an instant pivot torque to the left until centered.</li>
+                <li><strong>Safety Recovery:</strong> If both sensors lose the line (0, 0), the bot brakes and sweeps left/right searching for the lost line rather than blindly driving into crops.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: HARDWARE ARCHITECTURE -->
+        <div class="tab-content" id="tabHwArchitecture">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; color: var(--text-muted);">Click any component block to inspect hardware specifications and pin connections.</span>
+            <span style="font-size: 11px; color: var(--accent-green-bright);">● Live Signal Pulses Active</span>
+          </div>
+
+          <div class="hw-diagram-container">
+            <svg class="hw-svg-canvas" id="hwSvgCanvas" viewBox="0 0 760 460">
+              <defs>
+                <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+
+              <path class="hw-wire" d="M 120 70 L 220 70" stroke="#ef4444" stroke-width="2.5" />
+              <path class="hw-wire" d="M 70 100 L 70 340 L 460 340" stroke="#ef4444" stroke-width="2" />
+              <path class="hw-wire hw-wire-active" d="M 330 70 L 390 70 L 390 150" stroke="#10b981" stroke-width="2.5" />
+              <path class="hw-wire hw-wire-active" id="wireIRLeft" d="M 140 180 L 320 180" stroke="#06b6d4" stroke-width="2" />
+              <path class="hw-wire hw-wire-active" id="wireIRRight" d="M 140 240 L 320 240" stroke="#06b6d4" stroke-width="2" />
+              <path class="hw-wire hw-wire-active" id="wireMotorLogic" d="M 440 220 L 510 220 L 510 290" stroke="#f59e0b" stroke-width="2.5" />
+              <path class="hw-wire hw-wire-active" id="wireLeftMotor" d="M 600 310 L 650 310 L 650 240 L 670 240" stroke="#38bdf8" stroke-width="2" />
+              <path class="hw-wire hw-wire-active" id="wireRightMotor" d="M 600 340 L 650 340 L 650 380 L 670 380" stroke="#38bdf8" stroke-width="2" />
+              <path class="hw-wire" d="M 230 400 L 360 400 L 360 270" stroke="#8b5cf6" stroke-width="1.5" />
+              <path class="hw-wire" d="M 600 120 L 440 120 L 440 150" stroke="#8b5cf6" stroke-width="1.5" />
+
+              <g class="hw-node" data-comp-id="battery" transform="translate(20, 40)">
+                <rect class="hw-node-rect" width="100" height="60" rx="6" fill="#1e293b" stroke="#ef4444" />
+                <text x="50" y="24" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">BATTERY</text>
+                <text x="50" y="40" fill="#f87171" font-size="10" text-anchor="middle">11.1V 3S Li-Po</text>
+                <text x="50" y="52" fill="#94a3b8" font-size="8" text-anchor="middle">Main Power</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="lm2596" transform="translate(220, 40)">
+                <rect class="hw-node-rect" width="110" height="60" rx="6" fill="#1e293b" stroke="#10b981" />
+                <text x="55" y="24" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">LM2596 REG</text>
+                <text x="55" y="40" fill="#34d399" font-size="10" text-anchor="middle">5.0V Regulated</text>
+                <text x="55" y="52" fill="#94a3b8" font-size="8" text-anchor="middle">Buck Converter</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="esp32" transform="translate(320, 150)">
+                <rect class="hw-node-rect" width="120" height="120" rx="8" fill="#0d1527" stroke="#38bdf8" stroke-width="2.5" filter="url(#glow-cyan)" />
+                <text x="60" y="32" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">ESP32 DevKit</text>
+                <text x="60" y="48" fill="#ffffff" font-size="10" text-anchor="middle">Dual-Core 240MHz</text>
+                <text x="60" y="66" fill="#94a3b8" font-size="9" text-anchor="middle">OOP Navigation</text>
+                <rect x="25" y="78" width="70" height="24" rx="4" fill="#1e293b" stroke="#38bdf8" />
+                <text x="60" y="94" fill="#34d399" font-size="10" font-weight="bold" text-anchor="middle">CORE BRAIN</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="irLeft" transform="translate(20, 150)">
+                <rect class="hw-node-rect" id="hwNodeIRLeft" width="120" height="55" rx="6" fill="#1e293b" stroke="#06b6d4" />
+                <text x="60" y="22" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">LEFT IR SENSOR</text>
+                <text x="60" y="37" fill="#38bdf8" font-size="10" text-anchor="middle" id="hwTextIRLeft">Digital: 0 (Soil)</text>
+                <text x="60" y="49" fill="#10b981" font-size="8" font-weight="bold" text-anchor="middle">PRIMARY NAV</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="irRight" transform="translate(20, 220)">
+                <rect class="hw-node-rect" id="hwNodeIRRight" width="120" height="55" rx="6" fill="#1e293b" stroke="#06b6d4" />
+                <text x="60" y="22" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">RIGHT IR SENSOR</text>
+                <text x="60" y="37" fill="#38bdf8" font-size="10" text-anchor="middle" id="hwTextIRRight">Digital: 0 (Soil)</text>
+                <text x="60" y="49" fill="#10b981" font-size="8" font-weight="bold" text-anchor="middle">PRIMARY NAV</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="l298n" transform="translate(480, 270)">
+                <rect class="hw-node-rect" width="120" height="90" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2" />
+                <text x="60" y="24" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">L298N DRIVER</text>
+                <text x="60" y="40" fill="#fbbf24" font-size="10" text-anchor="middle">Dual H-Bridge</text>
+                <text x="60" y="56" fill="#94a3b8" font-size="9" text-anchor="middle">PWM + Dir Logic</text>
+                <text x="60" y="74" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle" id="hwTextL298N">ENA: 0 | ENB: 0</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="motors" transform="translate(640, 210)">
+                <rect class="hw-node-rect" width="100" height="55" rx="6" fill="#1e293b" stroke="#38bdf8" />
+                <text x="50" y="22" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">LEFT MOTOR</text>
+                <text x="50" y="37" fill="#38bdf8" font-size="10" text-anchor="middle" id="hwTextMotorL">0 RPM</text>
+                <text x="50" y="48" fill="#94a3b8" font-size="8" text-anchor="middle">Geared Traction</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="motors" transform="translate(640, 350)">
+                <rect class="hw-node-rect" width="100" height="55" rx="6" fill="#1e293b" stroke="#38bdf8" />
+                <text x="50" y="22" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">RIGHT MOTOR</text>
+                <text x="50" y="37" fill="#38bdf8" font-size="10" text-anchor="middle" id="hwTextMotorR">0 RPM</text>
+                <text x="50" y="48" fill="#94a3b8" font-size="8" text-anchor="middle">Geared Traction</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="ultrasonic" transform="translate(560, 40)">
+                <rect class="hw-node-rect" width="160" height="60" rx="6" fill="#1e293b" stroke="#8b5cf6" />
+                <text x="80" y="22" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">HC-SR04 ULTRASONIC</text>
+                <text x="80" y="38" fill="#c084fc" font-size="10" text-anchor="middle" id="hwTextUltrasonic">Sonar: 250 cm</text>
+                <text x="80" y="50" fill="#94a3b8" font-size="8" text-anchor="middle">Monitoring / Safety Extension</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="dht11" transform="translate(20, 370)">
+                <rect class="hw-node-rect" width="180" height="60" rx="6" fill="#1e293b" stroke="#8b5cf6" />
+                <text x="90" y="20" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">FIELD SENSORS (EXT)</text>
+                <text x="90" y="35" fill="#c084fc" font-size="9" text-anchor="middle">DHT11 | LDR | Soil Moisture</text>
+                <text x="90" y="49" fill="#94a3b8" font-size="8" text-anchor="middle">Climate & Agronomy Monitoring</text>
+              </g>
+
+              <g class="hw-node" data-comp-id="gps" transform="translate(220, 370)">
+                <rect class="hw-node-rect" width="120" height="60" rx="6" fill="#1e293b" stroke="#8b5cf6" />
+                <text x="60" y="22" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">NEO-6M GPS</text>
+                <text x="60" y="36" fill="#c084fc" font-size="9" text-anchor="middle">UART2 Geo-Tagging</text>
+                <text x="60" y="49" fill="#94a3b8" font-size="8" text-anchor="middle">Location Extension</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- TAB 3: ESP32 PINOUT -->
+        <div class="tab-content" id="tabESP32Pinout">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+            ESP32 DevKit V1 (30-Pin) Hardware Pinout. Live LED indicators reflect digital HIGH/LOW and hardware PWM duty cycles.
+          </div>
+
+          <div class="esp32-visual-wrapper">
+            <div class="esp32-board-layout">
+              <div class="esp-pin-header" id="espLeftPins"></div>
+              <div class="esp-board-center">
+                <div class="esp-wroom-chip">
+                  <div style="width: 24px; height: 16px; background: #b45309; border-radius: 2px; margin-bottom: 4px;"></div>
+                  <div class="esp-wroom-title">ESP-WROOM-32</div>
+                  <div class="esp-wroom-sub">240MHz Dual Core</div>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 10px; color: #38bdf8; text-align: center;">
+                  <div>CP2102 USB-UART</div>
+                  <div style="color: var(--accent-green-bright); margin-top: 4px;">● POWER ON (5.0V)</div>
+                  <div style="color: #60a5fa; margin-top: 2px;" id="espBoardLed">● RUNNING LED (D2)</div>
+                </div>
+              </div>
+              <div class="esp-pin-header" id="espRightPins"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: L298N DRIVER -->
+        <div class="tab-content" id="tabL298NDriver">
+          <div class="l298n-grid">
+            <div class="l298n-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: #ffffff; font-size: 13px;">LEFT MOTOR CHANNEL</strong>
+                <span class="sensor-tile-badge" id="l298nLeftDir">STOP</span>
+              </div>
+              <div class="motor-tachometer-wrap">
+                <div class="tach-gauge">
+                  <div class="tach-circle" id="tachCircleLeft">
+                    <span class="tach-rpm-num" id="tachRpmLeft">0</span>
+                    <span class="tach-rpm-unit">RPM</span>
+                  </div>
+                  <small style="color: var(--text-muted);">Left Wheel Speed</small>
+                </div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11px; display: flex; justify-content: space-between; padding: 4px 0;">
+                <span style="color: var(--text-muted);">ENA Duty Cycle:</span>
+                <strong style="color: var(--accent-cyan-bright);" id="l298nEnaDuty">0% (PWM 0)</strong>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11px; display: flex; justify-content: space-between; padding: 4px 0;">
+                <span style="color: var(--text-muted);">Terminal Voltage:</span>
+                <strong style="color: #ffffff;" id="l298nLeftVolt">0.0 V</strong>
+              </div>
+            </div>
+
+            <div class="l298n-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: #ffffff; font-size: 13px;">RIGHT MOTOR CHANNEL</strong>
+                <span class="sensor-tile-badge" id="l298nRightDir">STOP</span>
+              </div>
+              <div class="motor-tachometer-wrap">
+                <div class="tach-gauge">
+                  <div class="tach-circle" id="tachCircleRight">
+                    <span class="tach-rpm-num" id="tachRpmRight">0</span>
+                    <span class="tach-rpm-unit">RPM</span>
+                  </div>
+                  <small style="color: var(--text-muted);">Right Wheel Speed</small>
+                </div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11px; display: flex; justify-content: space-between; padding: 4px 0;">
+                <span style="color: var(--text-muted);">ENB Duty Cycle:</span>
+                <strong style="color: var(--accent-cyan-bright);" id="l298nEnbDuty">0% (PWM 0)</strong>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11px; display: flex; justify-content: space-between; padding: 4px 0;">
+                <span style="color: var(--text-muted);">Terminal Voltage:</span>
+                <strong style="color: #ffffff;" id="l298nRightVolt">0.0 V</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">
+              Active H-Bridge Logic State:
+            </div>
+            <table class="logic-table">
+              <thead>
+                <tr>
+                  <th>ENA (GPIO 14)</th>
+                  <th>IN1 (GPIO 27)</th>
+                  <th>IN2 (GPIO 26)</th>
+                  <th>IN3 (GPIO 25)</th>
+                  <th>IN4 (GPIO 33)</th>
+                  <th>ENB (GPIO 12)</th>
+                  <th>ROBOT MOVEMENT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td id="tblENA">0</td>
+                  <td id="tblIN1">0</td>
+                  <td id="tblIN2">0</td>
+                  <td id="tblIN3">0</td>
+                  <td id="tblIN4">0</td>
+                  <td id="tblENB">0</td>
+                  <td id="tblMode" style="font-weight: 700; color: #cbd5e1;">STOP</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 5: OOP ARCHITECTURE -->
+        <div class="tab-content" id="tabOOPArchitecture">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+            Object-Oriented Architecture implemented in accordance with project documentation. Classes highlight in real time as their methods execute.
+          </div>
+
+          <div class="oop-layout-grid">
+            <div class="oop-class-card" id="oopCardRobot">
+              <div class="oop-class-header">
+                <span class="oop-class-name">class Robot</span>
+                <span class="sensor-tile-badge">COMPOSITE</span>
+              </div>
+              <div class="oop-sub-list">
+                <span style="color: var(--text-muted);">[Attributes]</span>
+                <div class="oop-sub-item"><span>• speed:</span> <strong id="oopAttrSpeed">0</strong></div>
+                <div class="oop-sub-item"><span>• direction:</span> <strong id="oopAttrDir">STOP</strong></div>
+                <div class="oop-sub-item"><span>• status:</span> <strong id="oopAttrStatus">IDLE</strong></div>
+                <span style="color: var(--text-muted); margin-top: 4px;">[Methods]</span>
+                <div class="oop-sub-item" id="oopMethodStart"><span>start()</span></div>
+                <div class="oop-sub-item" id="oopMethodStop"><span>stop()</span></div>
+                <div class="oop-sub-item" id="oopMethodMove"><span>move(track, dt)</span></div>
+              </div>
+            </div>
+
+            <div class="oop-class-card" id="oopCardLineSensor">
+              <div class="oop-class-header">
+                <span class="oop-class-name">class LineSensor</span>
+                <span class="sensor-tile-badge">SENSOR</span>
+              </div>
+              <div class="oop-sub-list">
+                <span style="color: var(--text-muted);">[Attributes]</span>
+                <div class="oop-sub-item"><span>• sensorValue:</span> <strong id="oopAttrSensorVal">0</strong></div>
+                <span style="color: var(--text-muted); margin-top: 4px;">[Methods]</span>
+                <div class="oop-sub-item" id="oopMethodReadSensor"><span>readSensor()</span></div>
+                <div class="oop-sub-item" id="oopMethodDetectLine"><span>detectLine()</span></div>
+              </div>
+            </div>
+
+            <div class="oop-class-card" id="oopCardController">
+              <div class="oop-class-header">
+                <span class="oop-class-name">class Controller</span>
+                <span class="sensor-tile-badge">BRAIN</span>
+              </div>
+              <div class="oop-sub-list">
+                <span style="color: var(--text-muted);">[Attributes]</span>
+                <div class="oop-sub-item"><span>• sensorData:</span> <strong id="oopAttrSensorData">[0, 0]</strong></div>
+                <span style="color: var(--text-muted); margin-top: 4px;">[Methods]</span>
+                <div class="oop-sub-item" id="oopMethodProcessInput"><span>processInput()</span></div>
+                <div class="oop-sub-item" id="oopMethodDecideMovement"><span>decideMovement()</span></div>
+              </div>
+            </div>
+
+            <div class="oop-class-card" id="oopCardMotor">
+              <div class="oop-class-header">
+                <span class="oop-class-name">class Motor</span>
+                <span class="sensor-tile-badge">ACTUATOR</span>
+              </div>
+              <div class="oop-sub-list">
+                <span style="color: var(--text-muted);">[Attributes]</span>
+                <div class="oop-sub-item"><span>• speed:</span> <strong id="oopAttrMotorSpeed">0</strong></div>
+                <div class="oop-sub-item"><span>• direction:</span> <strong id="oopAttrMotorDir">STOP</strong></div>
+                <span style="color: var(--text-muted); margin-top: 4px;">[Methods]</span>
+                <div class="oop-sub-item" id="oopMethodForward"><span>forward(pwm)</span></div>
+                <div class="oop-sub-item" id="oopMethodBackward"><span>backward(pwm)</span></div>
+                <div class="oop-sub-item" id="oopMethodMotorStop"><span>stop()</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="oop-call-trace-box">
+            <div class="oop-trace-title">Live OOP Method Call Trace:</div>
+            <div id="oopTraceList">
+              <div class="trace-item"><span class="trace-time">00:00.0</span> <span class="trace-class">Robot</span> <span class="trace-method">constructor()</span> <span class="trace-params">{ status: "IDLE" }</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: FLOWCHART -->
+        <div class="tab-content" id="tabFlowchart">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; color: var(--text-muted);">Real-time synchronized navigation flowchart following project specifications.</span>
+            <span style="font-size: 11px; color: var(--accent-green-bright);" id="fcCurrentStepLabel">Current: START</span>
+          </div>
+
+          <div class="flowchart-wrapper">
+            <svg class="fc-svg" viewBox="0 0 680 440">
+              <g class="fc-node active-fc-node" id="fc-start" transform="translate(40, 20)">
+                <rect class="fc-node-rect" width="100" height="34" rx="17" /><text class="fc-node-text" x="50" y="17">START</text>
+              </g>
+              <g class="fc-node" id="fc-init-bot" transform="translate(180, 20)">
+                <rect class="fc-node-rect" width="150" height="34" rx="6" /><text class="fc-node-text" x="75" y="17">Initialize Farm Bot</text>
+              </g>
+              <g class="fc-node" id="fc-init-hw" transform="translate(370, 20)">
+                <rect class="fc-node-rect" width="170" height="34" rx="6" /><text class="fc-node-text" x="85" y="17">Init Motors & Sensors</text>
+              </g>
+              <g class="fc-node" id="fc-read-sensors" transform="translate(230, 95)">
+                <rect class="fc-node-rect" width="150" height="34" rx="6" /><text class="fc-node-text" x="75" y="17">Read IR Sensors</text>
+              </g>
+              <g class="fc-node" id="fc-decision-line" transform="translate(225, 170)">
+                <polygon class="fc-node-rect" points="80,0 160,35 80,70 0,35" /><text class="fc-node-text" x="80" y="35">Line Detected?</text>
+              </g>
+              <g class="fc-node" id="fc-line-pos" transform="translate(450, 155)">
+                <rect class="fc-node-rect" width="160" height="34" rx="6" /><text class="fc-node-text" x="80" y="17">Determine Position</text>
+              </g>
+              <g class="fc-node" id="fc-adjust-motors" transform="translate(450, 225)">
+                <rect class="fc-node-rect" width="160" height="34" rx="6" /><text class="fc-node-text" x="80" y="17">Adjust Motor Speeds</text>
+              </g>
+              <g class="fc-node" id="fc-move-line" transform="translate(450, 295)">
+                <rect class="fc-node-rect" width="160" height="34" rx="6" /><text class="fc-node-text" x="80" y="17">Move Along Line</text>
+              </g>
+              <g class="fc-node" id="fc-stop-bot" transform="translate(30, 188)">
+                <rect class="fc-node-rect" width="130" height="34" rx="6" /><text class="fc-node-text" x="65" y="17">Stop Bot</text>
+              </g>
+              <g class="fc-node" id="fc-check-status" transform="translate(30, 255)">
+                <rect class="fc-node-rect" width="130" height="34" rx="6" /><text class="fc-node-text" x="65" y="17">Check Status</text>
+              </g>
+              <g class="fc-node" id="fc-recovery" transform="translate(30, 325)">
+                <rect class="fc-node-rect" width="140" height="34" rx="6" /><text class="fc-node-text" x="70" y="17">Attempt Recovery</text>
+              </g>
+              <g class="fc-node" id="fc-stop" transform="translate(250, 385)">
+                <rect class="fc-node-rect" width="110" height="34" rx="17" /><text class="fc-node-text" x="55" y="17">STOP</text>
+              </g>
+
+              <path class="fc-connector" d="M 140 37 L 180 37" />
+              <path class="fc-connector" d="M 330 37 L 370 37" />
+              <path class="fc-connector" d="M 455 54 L 455 75 L 305 75 L 305 95" />
+              <path class="fc-connector" d="M 305 129 L 305 170" />
+              <path class="fc-connector" d="M 385 205 L 450 172" />
+              <text x="405" y="185" fill="#34d399" font-size="10" font-weight="bold">YES</text>
+              <path class="fc-connector" d="M 530 189 L 530 225" />
+              <path class="fc-connector" d="M 530 259 L 530 295" />
+              <path class="fc-connector" d="M 610 312 L 640 312 L 640 112 L 380 112" />
+              <path class="fc-connector" d="M 225 205 L 160 205" />
+              <text x="185" y="198" fill="#f87171" font-size="10" font-weight="bold">NO</text>
+              <path class="fc-connector" d="M 95 222 L 95 255" />
+              <path class="fc-connector" d="M 95 289 L 95 325" />
+              <path class="fc-connector" d="M 170 342 L 305 342 L 305 385" />
+              <path class="fc-connector" d="M 100 359 L 100 375 L 205 375 L 205 205 L 225 205" stroke-dasharray="3,3" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- TAB 7: EVENT LOG -->
+        <div class="tab-content" id="tabEventLog">
+          <div class="event-log-container">
+            <div class="log-actions-bar">
+              <select class="log-filter-select" id="logFilter">
+                <option value="ALL">All Events (Filter)</option>
+                <option value="NAV">Navigation & Decisions</option>
+                <option value="MOTOR">Motor Driver</option>
+                <option value="SENSOR">Sensors & Obstacle</option>
+                <option value="WARN">Warnings & Recovery</option>
+              </select>
+              <div>
+                <button class="overlay-tool-btn" id="clearLogBtn">Clear Log</button>
+              </div>
+            </div>
+            <div class="log-stream-box" id="logStreamBox"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- COMPONENT INSPECTOR MODAL -->
+  <div class="modal-overlay" id="compModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close Modal">&times;</button>
+      <div class="modal-title" id="modalTitle">Component Name</div>
+      <div class="modal-category" id="modalCategory">Category</div>
+      <p class="modal-desc" id="modalDesc">Detailed description of this component.</p>
+      
+      <div class="modal-details-grid">
+        <div class="modal-details-item"><small>Operating Voltage</small><strong id="modalVoltage">5.0V</strong></div>
+        <div class="modal-details-item"><small>Interface Protocols</small><strong id="modalInterface">GPIO / PWM</strong></div>
+        <div class="modal-details-item"><small>System Role</small><strong id="modalRole">Navigation</strong></div>
+        <div class="modal-details-item"><small>Current Telemetry</small><strong id="modalTelemetry" style="color: var(--accent-green-bright);">Online</strong></div>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
+        PIN & INTERFACE CONNECTIONS:
+      </div>
+      <div class="modal-connections-list" id="modalConnections"></div>
+    </div>
+  </div>
+
+  <script>
+
+/* === FILE: simulation\oop_classes.js === */
+/**
+ * Object-Oriented Smart Farm Bot
+ * Core OOP Classes directly matching project documentation:
+ * 1. Robot
+ * 2. LineSensor
+ * 3. Motor
+ * 4. Controller
+ */
+
+/**
+ * LineSensor Class
+ * Attribute: sensorValue
+ * Methods: readSensor(), detectLine()
+ */
+class LineSensor {
+  constructor(name, side, offsetLateral, offsetForward) {
+    this.name = name;                  // "Left IR" or "Right IR"
+    this.side = side;                  // "left" or "right"
+    this.offsetLateral = offsetLateral;// lateral offset from robot center (px / cm)
+    this.offsetForward = offsetForward;// forward offset from robot center (px / cm)
+    this.sensorValue = 0;              // 1: line detected (black), 0: no line (soil/background)
+    this.analogValue = 4095;           // ADC reading (0: pure white/reflective, 4095: black/absorbing)
+    this.worldX = 0;
+    this.worldY = 0;
+    this.lastMethodCalled = null;
+  }
+
+  /**
+   * Reads the sensor at world position based on track luminance/mask
+   * @param {Object} track - The virtual farm track object
+   * @param {number} rx - Robot center X
+   * @param {number} ry - Robot center Y
+   * @param {number} angle - Robot heading angle in radians
+   * @returns {number} 1 if line detected, 0 otherwise
+   */
+  readSensor(track, rx, ry, angle) {
+    this.lastMethodCalled = 'readSensor';
+    // Calculate world position of this sensor
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    this.worldX = rx + this.offsetForward * cosA - this.offsetLateral * sinA;
+    this.worldY = ry + this.offsetForward * sinA + this.offsetLateral * cosA;
+
+    // Sample track at this world coordinate
+    const isOnLine = track.isPointOnPath(this.worldX, this.worldY);
+    this.sensorValue = isOnLine ? 1 : 0;
+    this.analogValue = isOnLine ? 3850 + Math.floor(Math.random() * 245) : 320 + Math.floor(Math.random() * 150);
+    return this.sensorValue;
+  }
+
+  /**
+   * Evaluates if line is detected based on threshold
+   * @returns {boolean}
+   */
+  detectLine() {
+    this.lastMethodCalled = 'detectLine';
+    return this.sensorValue === 1;
+  }
+}
+
+/**
+ * Motor Class
+ * Attributes: speed, direction
+ * Methods: forward(), backward(), stop()
+ */
+class Motor {
+  constructor(name, side) {
+    this.name = name;                  // "Left Motor" or "Right Motor"
+    this.side = side;                  // "left" or "right"
+    this.speed = 0;                    // PWM value 0 - 255
+    this.direction = 'STOP';           // 'FORWARD', 'BACKWARD', 'STOP'
+    this.rpm = 0;                      // Simulated RPM
+    this.currentDraw = 0.05;           // Amperes
+    this.lastMethodCalled = null;
+  }
+
+  forward(pwmSpeed = 200) {
+    this.lastMethodCalled = 'forward';
+    this.speed = Math.max(0, Math.min(255, Math.round(pwmSpeed)));
+    this.direction = 'FORWARD';
+    this.rpm = Math.round((this.speed / 255) * 160);
+    this.currentDraw = 0.15 + (this.speed / 255) * 0.35;
+  }
+
+  backward(pwmSpeed = 150) {
+    this.lastMethodCalled = 'backward';
+    this.speed = Math.max(0, Math.min(255, Math.round(pwmSpeed)));
+    this.direction = 'BACKWARD';
+    this.rpm = -Math.round((this.speed / 255) * 160);
+    this.currentDraw = 0.2 + (this.speed / 255) * 0.4;
+  }
+
+  stop() {
+    this.lastMethodCalled = 'stop';
+    this.speed = 0;
+    this.direction = 'STOP';
+    this.rpm = 0;
+    this.currentDraw = 0.02;
+  }
+}
+
+/**
+ * Controller Class (ESP32 DevKit Brain)
+ * Attribute: sensorData
+ * Methods: processInput(), decideMovement()
+ */
+class Controller {
+  constructor() {
+    this.sensorData = {
+      leftIR: 0,
+      rightIR: 0,
+      ultrasonicDistanceCm: 999
+    };
+    this.decision = 'IDLE';            // 'MOVE_FORWARD', 'TURN_LEFT', 'TURN_RIGHT', 'RECOVERY_SCAN', 'STOP_OBSTACLE', 'ARRIVED'
+    this.reason = 'Awaiting start signal';
+    this.lastMethodCalled = null;
+    this.basePwm = 180;
+    this.turnPwmHigh = 200;
+    this.turnPwmLow = 30;
+    this.obstacleAvoidanceEnabled = false;
+  }
+
+  /**
+   * Process raw sensor inputs
+   * @param {number} leftIR 
+   * @param {number} rightIR 
+   * @param {number} ultrasonicCm 
+   */
+  processInput(leftIR, rightIR, ultrasonicCm = 999) {
+    this.lastMethodCalled = 'processInput';
+    this.sensorData.leftIR = leftIR;
+    this.sensorData.rightIR = rightIR;
+    this.sensorData.ultrasonicDistanceCm = ultrasonicCm;
+  }
+
+  /**
+   * Core Line-Following Logic according to the project specification truth table:
+   * 
+   * | Left IR | Right IR | Robot Behavior                       |
+   * |---------|----------|--------------------------------------|
+   * | 1 (Line)| 1 (Line) | Move forward                         |
+   * | 1 (Line)| 0 (Soil) | Turn left to correct                 |
+   * | 0 (Soil)| 1 (Line) | Turn right to correct                |
+   * | 0 (Soil)| 0 (Soil) | Stop and enter line-lost recovery    |
+   * 
+   * Plus optional obstacle monitoring / safety stop if obstacle avoidance is enabled.
+   */
+  decideMovement(robotStatus) {
+    this.lastMethodCalled = 'decideMovement';
+
+    // Check optional obstacle detection override
+    if (this.obstacleAvoidanceEnabled && this.sensorData.ultrasonicDistanceCm < 25) {
+      this.decision = 'STOP_OBSTACLE';
+      this.reason = `Obstacle detected at ${this.sensorData.ultrasonicDistanceCm.toFixed(1)} cm! Emergency brake engaged.`;
+      return {
+        decision: this.decision,
+        reason: this.reason,
+        leftPwm: 0,
+        rightPwm: 0,
+        leftDir: 'STOP',
+        rightDir: 'STOP'
+      };
+    }
+
+    const { leftIR, rightIR } = this.sensorData;
+
+    // Case 1: Both sensors detect line -> Move Forward
+    if (leftIR === 1 && rightIR === 1) {
+      this.decision = 'MOVE_FORWARD';
+      this.reason = 'Both IR sensors detect line -> Centered on track. Drive straight forward.';
+      return {
+        decision: this.decision,
+        reason: this.reason,
+        leftPwm: this.basePwm,
+        rightPwm: this.basePwm,
+        leftDir: 'FORWARD',
+        rightDir: 'FORWARD'
+      };
+    }
+
+    // Case 2: Left sensor detects line, Right does not -> Robot drifted right -> Turn Left to correct
+    if (leftIR === 1 && rightIR === 0) {
+      this.decision = 'TURN_LEFT';
+      this.reason = 'Left IR detects line, Right IR off line -> Steer left (Slow left motor, full right motor).';
+      return {
+        decision: this.decision,
+        reason: this.reason,
+        leftPwm: this.turnPwmLow,
+        rightPwm: this.turnPwmHigh,
+        leftDir: 'FORWARD',
+        rightDir: 'FORWARD'
+      };
+    }
+
+    // Case 3: Right sensor detects line, Left does not -> Robot drifted left -> Turn Right to correct
+    if (leftIR === 0 && rightIR === 1) {
+      this.decision = 'TURN_RIGHT';
+      this.reason = 'Right IR detects line, Left IR off line -> Steer right (Full left motor, slow right motor).';
+      return {
+        decision: this.decision,
+        reason: this.reason,
+        leftPwm: this.turnPwmHigh,
+        rightPwm: this.turnPwmLow,
+        leftDir: 'FORWARD',
+        rightDir: 'FORWARD'
+      };
+    }
+
+    // Case 4: Neither sensor detects line -> Robot lost track -> Line-lost recovery
+    this.decision = 'LINE_LOST';
+    this.reason = 'Neither IR sensor detects line -> Line lost! Initiating controlled recovery search.';
+    return {
+      decision: this.decision,
+      reason: this.reason,
+      leftPwm: 0,
+      rightPwm: 0,
+      leftDir: 'STOP',
+      rightDir: 'STOP'
+    };
+  }
+}
+
+/**
+ * Robot Class
+ * Attributes: speed, direction, status
+ * Methods: start(), stop(), move()
+ */
+class Robot {
+  constructor(x = 100, y = 150, angle = 0) {
+    // Physical & Kinematic state
+    this.x = x;
+    this.y = y;
+    this.startX = x;
+    this.startY = y;
+    this.angle = angle;                 // heading in radians
+    this.startAngle = angle;
+    this.speed = 0;                     // linear speed in px/s (approx cm/s)
+    this.direction = 'STOP';            // 'FORWARD', 'TURNING_LEFT', 'TURNING_RIGHT', 'RECOVERY', 'STOP'
+    this.status = 'IDLE';               // 'IDLE', 'RUNNING', 'PAUSED', 'LINE_LOST', 'COMPLETED', 'ERROR', 'ESTOP'
+    
+    // Geometry
+    this.chassisWidth = 44;             // px
+    this.chassisLength = 62;            // px
+    this.wheelBase = 46;                // px between left & right wheels
+    this.wheelRadius = 14;              // px
+    this.leftWheelAngle = 0;            // radians for wheel rotation animation
+    this.rightWheelAngle = 0;           // radians for wheel rotation animation
+
+    // Distance & runtime stats
+    this.distanceTraveledMeters = 0;
+    this.elapsedSeconds = 0;
+
+    // Subsystems (OOP Composition)
+    this.leftSensor = new LineSensor('Left IR Sensor', 'left', -11, 28);
+    this.rightSensor = new LineSensor('Right IR Sensor', 'right', 11, 28);
+    this.leftMotor = new Motor('Left DC Motor', 'left');
+    this.rightMotor = new Motor('Right DC Motor', 'right');
+    this.controller = new Controller();
+
+    // Recovery State Machine
+    this.recoveryPhase = 'IDLE';        // 'SWEEP_LEFT', 'SWEEP_RIGHT', 'TIMEOUT'
+    this.recoveryTimer = 0;             // seconds spent in recovery
+    this.recoverySweepAngle = 0;
+    this.recoveryMaxTimeout = 4.5;      // seconds before declaring error
+
+    // OOP call trace record for live visualization
+    this.activeCallTrace = [];
+    this.lastMethodCalled = null;
+  }
+
+  /**
+   * Starts the robot autonomous line-following cycle
+   */
+  start() {
+    this.lastMethodCalled = 'start';
+    if (this.status === 'RUNNING') return;
+    this.status = 'RUNNING';
+    this.direction = 'FORWARD';
+    this.recordTrace('Robot', 'start()', { status: this.status });
+  }
+
+  /**
+   * Stops the robot safely
+   * @param {string} reason 
+   */
+  stop(reason = 'User command') {
+    this.lastMethodCalled = 'stop';
+    this.status = 'IDLE';
+    this.direction = 'STOP';
+    this.speed = 0;
+    this.leftMotor.stop();
+    this.rightMotor.stop();
+    this.recordTrace('Robot', 'stop()', { reason });
+  }
+
+  emergencyStop() {
+    this.lastMethodCalled = 'stop';
+    this.status = 'ESTOP';
+    this.direction = 'STOP';
+    this.speed = 0;
+    this.leftMotor.stop();
+    this.rightMotor.stop();
+    this.recordTrace('Robot', 'emergencyStop()', { status: 'ESTOP' });
+  }
+
+  pause() {
+    if (this.status === 'RUNNING') {
+      this.status = 'PAUSED';
+      this.leftMotor.stop();
+      this.rightMotor.stop();
+      this.recordTrace('Robot', 'pause()', {});
+    }
+  }
+
+  resume() {
+    if (this.status === 'PAUSED') {
+      this.status = 'RUNNING';
+      this.recordTrace('Robot', 'resume()', {});
+    }
+  }
+
+  reset(x = this.startX, y = this.startY, angle = this.startAngle) {
+    this.x = x;
+    this.y = y;
+    this.startX = x;
+    this.startY = y;
+    this.angle = angle;
+    this.startAngle = angle;
+    this.speed = 0;
+    this.direction = 'STOP';
+    this.status = 'IDLE';
+    this.leftWheelAngle = 0;
+    this.rightWheelAngle = 0;
+    this.distanceTraveledMeters = 0;
+    this.elapsedSeconds = 0;
+    this.leftSensor.sensorValue = 0;
+    this.rightSensor.sensorValue = 0;
+    this.leftMotor.stop();
+    this.rightMotor.stop();
+    this.recoveryPhase = 'IDLE';
+    this.recoveryTimer = 0;
+    this.recoverySweepAngle = 0;
+    this.activeCallTrace = [];
+    this.recordTrace('Robot', 'reset()', { x, y, angle });
+  }
+
+  recordTrace(className, method, params = {}) {
+    this.activeCallTrace.push({
+      timestamp: Date.now(),
+      className,
+      method,
+      params
+    });
+    if (this.activeCallTrace.length > 8) {
+      this.activeCallTrace.shift();
+    }
+  }
+
+  /**
+   * Main simulation execution step
+   * Reads sensors -> Processes input -> Decides movement -> Commands motors -> Updates differential drive position
+   * @param {Object} track - The virtual farm field track
+   * @param {number} ultrasonicCm - Measured distance to obstacle
+   * @param {number} dt - Timestep in seconds
+   * @returns {Object} Step telemetry and status
+   */
+  move(track, ultrasonicCm = 999, dt = 0.016) {
+    this.lastMethodCalled = 'move';
+    if (this.status !== 'RUNNING' && this.status !== 'LINE_LOST') {
+      return { status: this.status, decision: this.controller.decision };
+    }
+
+    this.elapsedSeconds += dt;
+
+    // 1. LineSensor reads the line
+    const leftDetected = this.leftSensor.readSensor(track, this.x, this.y, this.angle);
+    const rightDetected = this.rightSensor.readSensor(track, this.x, this.y, this.angle);
+    this.recordTrace('LineSensor', 'readSensor()', { left: leftDetected, right: rightDetected });
+
+    // 2. Controller processes input
+    this.controller.processInput(leftDetected, rightDetected, ultrasonicCm);
+    this.recordTrace('Controller', 'processInput()', { left: leftDetected, right: rightDetected, dist: ultrasonicCm.toFixed(1) });
+
+    // 3. Controller decides movement
+    const decisionResult = this.controller.decideMovement(this.status);
+    this.recordTrace('Controller', 'decideMovement()', { decision: decisionResult.decision });
+
+    let vL = 0; // left wheel linear velocity px/s
+    let vR = 0; // right wheel linear velocity px/s
+
+    if (decisionResult.decision === 'STOP_OBSTACLE') {
+      this.leftMotor.stop();
+      this.rightMotor.stop();
+      this.direction = 'STOP';
+      this.speed = 0;
+      return { status: this.status, decision: decisionResult.decision, reason: decisionResult.reason };
+    }
+
+    // Normal Line Tracking
+    if (decisionResult.decision === 'MOVE_FORWARD') {
+      this.status = 'RUNNING';
+      this.direction = 'FORWARD';
+      this.recoveryPhase = 'IDLE';
+      this.recoveryTimer = 0;
+
+      this.leftMotor.forward(decisionResult.leftPwm);
+      this.rightMotor.forward(decisionResult.rightPwm);
+      this.recordTrace('Motor', 'forward()', { leftPwm: decisionResult.leftPwm, rightPwm: decisionResult.rightPwm });
+
+      vL = (decisionResult.leftPwm / 255) * 75;
+      vR = (decisionResult.rightPwm / 255) * 75;
+    } else if (decisionResult.decision === 'TURN_LEFT') {
+      this.status = 'RUNNING';
+      this.direction = 'TURNING_LEFT';
+      this.recoveryPhase = 'IDLE';
+      this.recoveryTimer = 0;
+
+      this.leftMotor.forward(decisionResult.leftPwm);
+      this.rightMotor.forward(decisionResult.rightPwm);
+      this.recordTrace('Motor', 'forward(turnLeft)', { leftPwm: decisionResult.leftPwm, rightPwm: decisionResult.rightPwm });
+
+      vL = (decisionResult.leftPwm / 255) * 75;
+      vR = (decisionResult.rightPwm / 255) * 75;
+    } else if (decisionResult.decision === 'TURN_RIGHT') {
+      this.status = 'RUNNING';
+      this.direction = 'TURNING_RIGHT';
+      this.recoveryPhase = 'IDLE';
+      this.recoveryTimer = 0;
+
+      this.leftMotor.forward(decisionResult.leftPwm);
+      this.rightMotor.forward(decisionResult.rightPwm);
+      this.recordTrace('Motor', 'forward(turnRight)', { leftPwm: decisionResult.leftPwm, rightPwm: decisionResult.rightPwm });
+
+      vL = (decisionResult.leftPwm / 255) * 75;
+      vR = (decisionResult.rightPwm / 255) * 75;
+    } else if (decisionResult.decision === 'LINE_LOST') {
+      // 4. Line Lost Recovery Routine
+      this.status = 'LINE_LOST';
+      this.direction = 'RECOVERY';
+      this.recoveryTimer += dt;
+
+      if (this.recoveryTimer > this.recoveryMaxTimeout) {
+        // Recovery timeout expired -> Safe Stop & Error
+        this.status = 'ERROR';
+        this.direction = 'STOP';
+        this.leftMotor.stop();
+        this.rightMotor.stop();
+        this.speed = 0;
+        this.recordTrace('Robot', 'stop()', { error: 'Line lost recovery timeout. Manual intervention required.' });
+        return { status: this.status, decision: 'RECOVERY_TIMEOUT', reason: 'Line lost timeout. Stopped.' };
+      }
+
+      // Controlled search oscillation:
+      // 0 - 1.2s: Pivot counter-clockwise (search left)
+      // 1.2 - 3.0s: Pivot clockwise (search right)
+      // 3.0 - 4.5s: Slow forward creep + search
+      if (this.recoveryTimer < 1.2) {
+        this.recoveryPhase = 'SWEEP_LEFT';
+        this.leftMotor.backward(90);
+        this.rightMotor.forward(110);
+        vL = -28;
+        vR = 34;
+      } else if (this.recoveryTimer < 3.0) {
+        this.recoveryPhase = 'SWEEP_RIGHT';
+        this.leftMotor.forward(110);
+        this.rightMotor.backward(90);
+        vL = 34;
+        vR = -28;
+      } else {
+        this.recoveryPhase = 'CREEP_FORWARD';
+        this.leftMotor.forward(80);
+        this.rightMotor.forward(80);
+        vL = 22;
+        vR = 22;
+      }
+      this.recordTrace('Robot', 'recoverySweep()', { phase: this.recoveryPhase, timer: this.recoveryTimer.toFixed(1) });
+    }
+
+    // 5. Differential Drive Kinematics Update
+    // v = (vL + vR) / 2
+    // omega = (vR - vL) / wheelBase
+    const linearV = (vL + vR) / 2;
+    const omega = (vR - vL) / this.wheelBase;
+
+    this.speed = linearV;
+    this.angle += omega * dt;
+    // Normalize angle to [0, 2*PI)
+    this.angle = (this.angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+
+    const dx = linearV * Math.cos(this.angle) * dt;
+    const dy = linearV * Math.sin(this.angle) * dt;
+
+    this.x += dx;
+    this.y += dy;
+
+    // Wheel rotation animation (rad)
+    this.leftWheelAngle += (vL / this.wheelRadius) * dt;
+    this.rightWheelAngle += (vR / this.wheelRadius) * dt;
+
+    // Accumulate distance (100 px ~ 1 meter)
+    const stepDist = Math.sqrt(dx * dx + dy * dy);
+    this.distanceTraveledMeters += stepDist / 100;
+
+    // Check Destination Reached
+    if (track.isAtDestination(this.x, this.y)) {
+      this.status = 'COMPLETED';
+      this.direction = 'STOP';
+      this.speed = 0;
+      this.leftMotor.stop();
+      this.rightMotor.stop();
+      this.recordTrace('Robot', 'stop()', { destination: 'Reached final farm depot!' });
+    }
+
+    return {
+      status: this.status,
+      decision: decisionResult.decision,
+      reason: decisionResult.reason,
+      leftPwm: this.leftMotor.speed,
+      rightPwm: this.rightMotor.speed
+    };
+  }
+}
+
+// Export for browser global context
+if (typeof window !== 'undefined') {
+  window.LineSensor = LineSensor;
+  window.Motor = Motor;
+  window.Controller = Controller;
+  window.Robot = Robot;
+}
+
+
+/* === FILE: simulation\field_track.js === */
+/**
+ * Agricultural Field & Track Geometry System
+ * Renders realistic top-down farm terrain with crop beds, furrows, navigation tracks,
+ * destination zones, and manages geometric line-collision queries.
+ */
+
+class FarmTrack {
+  constructor(canvasWidth = 800, canvasHeight = 520) {
+    this.width = canvasWidth;
+    this.height = canvasHeight;
+    this.currentScenarioId = 1;
+    this.lineWidth = 22; // width of the black guidance line in pixels
+    
+    // Path definition: array of polyline segments or bezier curves
+    this.segments = [];
+    this.startPoint = { x: 100, y: 260, angle: 0 };
+    this.destinationPoint = { x: 700, y: 260, radius: 36 };
+
+    // Crop rows / farm bed layout
+    this.cropRows = [];
+    
+    // Interactive Obstacle
+    this.obstacle = {
+      x: 480,
+      y: 260,
+      width: 32,
+      height: 32,
+      enabled: false,
+      isDragging: false,
+      label: 'Crate Obstacle'
+    };
+
+    // Pre-calculated offscreen pattern canvas for performant soil & crop drawing
+    this.soilPattern = null;
+    this.initScenarios();
+    this.loadScenario(1);
+  }
+
+  initScenarios() {
+    this.scenarios = {
+      // 1. Straight Path
+      1: {
+        id: 1,
+        title: 'Scenario 1: Straight Agricultural Row',
+        description: 'Robot traverses a straight furrow path between two rows of vegetables. Both IR sensors detect the line simultaneously to drive forward with balanced PWM.',
+        start: { x: 100, y: 260, angle: 0 },
+        destination: { x: 720, y: 260, radius: 34 },
+        obstacle: { enabled: false, x: 450, y: 260 },
+        points: [
+          { x: 80, y: 260 },
+          { x: 730, y: 260 }
+        ],
+        crops: [
+          { x: 80, y: 150, w: 660, h: 60, type: 'cabbage' },
+          { x: 80, y: 310, w: 660, h: 60, type: 'lettuce' }
+        ]
+      },
+
+      // 2. Left Turn
+      2: {
+        id: 2,
+        title: 'Scenario 2: Left 90° Turn & Bend',
+        description: 'Robot approaches a sharp 90-degree left turn. Left IR sensor goes off the line first, triggering the Left Correction differential turn.',
+        start: { x: 100, y: 380, angle: 0 },
+        destination: { x: 440, y: 90, radius: 34 },
+        obstacle: { enabled: false, x: 500, y: 380 },
+        points: [
+          { x: 80, y: 380 },
+          { x: 380, y: 380 },
+          { x: 440, y: 340 },
+          { x: 440, y: 80 }
+        ],
+        crops: [
+          { x: 80, y: 430, w: 420, h: 60, type: 'carrots' },
+          { x: 80, y: 240, w: 260, h: 90, type: 'cabbage' },
+          { x: 500, y: 80, w: 90, h: 320, type: 'lettuce' }
+        ]
+      },
+
+      // 3. Right Turn
+      3: {
+        id: 3,
+        title: 'Scenario 3: Right 90° Turn & Arc',
+        description: 'Robot tracks along a field row before turning right into an irrigation aisle. Right IR sensor detects edge loss, commanding right motor deceleration.',
+        start: { x: 100, y: 130, angle: 0 },
+        destination: { x: 460, y: 430, radius: 34 },
+        obstacle: { enabled: false, x: 500, y: 130 },
+        points: [
+          { x: 80, y: 130 },
+          { x: 400, y: 130 },
+          { x: 460, y: 180 },
+          { x: 460, y: 440 }
+        ],
+        crops: [
+          { x: 80, y: 40, w: 420, h: 55, type: 'lettuce' },
+          { x: 80, y: 220, w: 280, h: 90, type: 'cabbage' },
+          { x: 520, y: 160, w: 100, h: 280, type: 'tomatoes' }
+        ]
+      },
+
+      // 4. Line Lost & Recovery
+      4: {
+        id: 4,
+        title: 'Scenario 4: Line Lost & Recovery Search',
+        description: 'Simulates a washed-out track section or soil disruption. Both IR sensors lose the line, triggering the sweeping recovery algorithm to re-acquire the path.',
+        start: { x: 100, y: 260, angle: 0 },
+        destination: { x: 720, y: 260, radius: 34 },
+        obstacle: { enabled: false, x: 450, y: 260 },
+        // Two disjoint lines with an intentional 90px gap in between
+        isDisjoint: true,
+        segments: [
+          [{ x: 80, y: 260 }, { x: 310, y: 260 }],
+          [{ x: 405, y: 260 }, { x: 730, y: 260 }]
+        ],
+        crops: [
+          { x: 80, y: 150, w: 660, h: 60, type: 'cabbage' },
+          { x: 80, y: 310, w: 660, h: 60, type: 'lettuce' }
+        ]
+      },
+
+      // 5. Obstacle Detected
+      5: {
+        id: 5,
+        title: 'Scenario 5: Obstacle Detection in Crop Bed',
+        description: 'An obstacle (crate / farm equipment) is placed along the furrow. The HC-SR04 ultrasonic sensor reads distance in real time. Can be dragged anywhere on field.',
+        start: { x: 100, y: 260, angle: 0 },
+        destination: { x: 720, y: 260, radius: 34 },
+        obstacle: { enabled: true, x: 440, y: 260, width: 32, height: 32 },
+        points: [
+          { x: 80, y: 260 },
+          { x: 730, y: 260 }
+        ],
+        crops: [
+          { x: 80, y: 150, w: 660, h: 60, type: 'cabbage' },
+          { x: 80, y: 310, w: 660, h: 60, type: 'lettuce' }
+        ]
+      },
+
+      // 6. Complete Farm Route
+      6: {
+        id: 6,
+        title: 'Scenario 6: Complete Autonomous Farm Circuit',
+        description: 'Full agricultural route traversing crop bays, right-angle turns, sweeping curves, and return depot. Demonstrates continuous multi-stage autonomous navigation.',
+        start: { x: 90, y: 110, angle: 0 },
+        destination: { x: 120, y: 430, radius: 36 },
+        obstacle: { enabled: true, x: 620, y: 270, width: 32, height: 32 },
+        points: [
+          { x: 80, y: 110 },
+          { x: 420, y: 110 },
+          { x: 500, y: 140 },
+          { x: 650, y: 140 },
+          { x: 710, y: 200 },
+          { x: 710, y: 330 },
+          { x: 640, y: 390 },
+          { x: 420, y: 390 },
+          { x: 360, y: 340 },
+          { x: 360, y: 260 },
+          { x: 260, y: 260 },
+          { x: 200, y: 320 },
+          { x: 200, y: 430 },
+          { x: 110, y: 430 }
+        ],
+        crops: [
+          { x: 120, y: 35, w: 550, h: 40, type: 'lettuce' },
+          { x: 120, y: 160, w: 320, h: 60, type: 'cabbage' },
+          { x: 460, y: 210, w: 180, h: 120, type: 'tomatoes' },
+          { x: 120, y: 310, w: 180, h: 65, type: 'carrots' },
+          { x: 380, y: 440, w: 300, h: 50, type: 'lettuce' }
+        ]
+      }
+    };
+  }
+
+  loadScenario(id = 1) {
+    const scn = this.scenarios[id] || this.scenarios[1];
+    this.currentScenarioId = id;
+    this.startPoint = { ...scn.start };
+    this.destinationPoint = { ...scn.destination };
+    this.cropRows = scn.crops ? JSON.parse(JSON.stringify(scn.crops)) : [];
+
+    if (scn.isDisjoint) {
+      this.isDisjoint = true;
+      this.disjointSegments = JSON.parse(JSON.stringify(scn.segments));
+      this.points = [];
+    } else {
+      this.isDisjoint = false;
+      this.disjointSegments = null;
+      this.points = JSON.parse(JSON.stringify(scn.points));
+    }
+
+    if (scn.obstacle) {
+      this.obstacle.enabled = scn.obstacle.enabled;
+      this.obstacle.x = scn.obstacle.x;
+      this.obstacle.y = scn.obstacle.y;
+    } else {
+      this.obstacle.enabled = false;
+    }
+
+    return scn;
+  }
+
+  /**
+   * Distance from point (px, py) to line segment (ax, ay) -> (bx, by)
+   */
+  distToSegment(px, py, ax, ay, bx, by) {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const l2 = dx * dx + dy * dy;
+    if (l2 === 0) return Math.hypot(px - ax, py - ay);
+
+    // Consider the line extending the segment, parameterized as a + t (b - a).
+    // Find projection of point p onto the line.
+    let t = ((px - ax) * dx + (py - ay) * dy) / l2;
+    t = Math.max(0, Math.min(1, t));
+    const projX = ax + t * dx;
+    const projY = ay + t * dy;
+    return Math.hypot(px - projX, py - projY);
+  }
+
+  /**
+   * Evaluates if world point (x, y) lies on the black track path
+   * @param {number} x 
+   * @param {number} y 
+   * @returns {boolean}
+   */
+  isPointOnPath(x, y) {
+    const halfWidth = this.lineWidth / 2;
+
+    if (this.isDisjoint && this.disjointSegments) {
+      for (const seg of this.disjointSegments) {
+        for (let i = 0; i < seg.length - 1; i++) {
+          const d = this.distToSegment(x, y, seg[i].x, seg[i].y, seg[i + 1].x, seg[i + 1].y);
+          if (d <= halfWidth) return true;
+        }
+      }
+      return false;
+    }
+
+    if (!this.points || this.points.length < 2) return false;
+
+    for (let i = 0; i < this.points.length - 1; i++) {
+      const p1 = this.points[i];
+      const p2 = this.points[i + 1];
+      const d = this.distToSegment(x, y, p1.x, p1.y, p2.x, p2.y);
+      if (d <= halfWidth) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if robot is inside the destination pad
+   */
+  isAtDestination(x, y) {
+    const d = Math.hypot(x - this.destinationPoint.x, y - this.destinationPoint.y);
+    return d <= this.destinationPoint.radius;
+  }
+
+  /**
+   * Calculates ray intersection from robot forward sensor to obstacle
+   * @param {number} rx - robot front X
+   * @param {number} ry - robot front Y
+   * @param {number} angle - robot heading angle
+   * @returns {number} distance in cm (1 px ~ 1 cm), capped at 250 cm
+   */
+  getUltrasonicDistance(rx, ry, angle) {
+    if (!this.obstacle || !this.obstacle.enabled) return 250;
+
+    const ox = this.obstacle.x;
+    const oy = this.obstacle.y;
+    const ow = this.obstacle.width;
+    const oh = this.obstacle.height;
+
+    // Obstacle bounding box
+    const minX = ox - ow / 2;
+    const maxX = ox + ow / 2;
+    const minY = oy - oh / 2;
+    const maxY = oy + oh / 2;
+
+    const dirX = Math.cos(angle);
+    const dirY = Math.sin(angle);
+
+    // Cast ray up to 250px
+    let minDist = 250;
+    const step = 2;
+    for (let dist = 5; dist <= 250; dist += step) {
+      const testX = rx + dirX * dist;
+      const testY = ry + dirY * dist;
+
+      if (testX >= minX && testX <= maxX && testY >= minY && testY <= maxY) {
+        minDist = dist;
+        break;
+      }
+    }
+
+    return Math.max(2, Math.min(250, minDist));
+  }
+
+  /**
+   * Draw the agricultural environment:
+   * 1. Rich soil bed with furrows
+   * 2. Crop rows (cabbage, lettuce, carrots, tomatoes)
+   * 3. Navigation black line path with edge contrast
+   * 4. Start checkpoint & Finish docking station
+   * 5. Interactive obstacle box
+   */
+  draw(ctx) {
+    // 1. Soil Ground Background
+    ctx.save();
+    ctx.fillStyle = '#1e1610'; // Deep fertile soil
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // Soil furrow lines (horizontal agricultural ridges)
+    ctx.strokeStyle = 'rgba(46, 32, 22, 0.6)';
+    ctx.lineWidth = 3;
+    for (let y = 15; y < this.height; y += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+      ctx.stroke();
+    }
+
+    // Fine organic soil texture specks
+    ctx.fillStyle = 'rgba(78, 54, 38, 0.4)';
+    for (let i = 0; i < 60; i++) {
+      const sx = ((i * 137) % this.width);
+      const sy = ((i * 223) % this.height);
+      ctx.fillRect(sx, sy, 3, 2);
+    }
+
+    // 2. Crop Rows & Farm Beds
+    for (const crop of this.cropRows) {
+      this.drawCropBed(ctx, crop);
+    }
+
+    // 3. Navigation Path Line
+    this.drawPath(ctx);
+
+    // 4. Start Marker
+    this.drawStartPoint(ctx);
+
+    // 5. Destination Finish Pad
+    this.drawDestinationPad(ctx);
+
+    // 6. Interactive Obstacle
+    if (this.obstacle.enabled) {
+      this.drawObstacle(ctx);
+    }
+
+    ctx.restore();
+  }
+
+  drawCropBed(ctx, crop) {
+    ctx.save();
+    // Bed earth base
+    ctx.fillStyle = '#2a1f17';
+    ctx.strokeStyle = '#3d2c20';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(crop.x, crop.y, crop.w, crop.h, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    // Drip irrigation black pipe running along center of bed
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const isHorizontal = crop.w >= crop.h;
+    if (isHorizontal) {
+      ctx.moveTo(crop.x + 4, crop.y + crop.h / 2);
+      ctx.lineTo(crop.x + crop.w - 4, crop.y + crop.h / 2);
+    } else {
+      ctx.moveTo(crop.x + crop.w / 2, crop.y + 4);
+      ctx.lineTo(crop.x + crop.w / 2, crop.y + crop.h - 4);
+    }
+    ctx.stroke();
+
+    // Crop foliage plants
+    const plantSpacing = 28;
+    if (isHorizontal) {
+      const count = Math.floor((crop.w - 20) / plantSpacing);
+      for (let i = 0; i < count; i++) {
+        const px = crop.x + 16 + i * plantSpacing;
+        const py = crop.y + crop.h / 2;
+        this.drawSinglePlant(ctx, px, py, crop.type);
+      }
+    } else {
+      const count = Math.floor((crop.h - 20) / plantSpacing);
+      for (let i = 0; i < count; i++) {
+        const px = crop.x + crop.w / 2;
+        const py = crop.y + 16 + i * plantSpacing;
+        this.drawSinglePlant(ctx, px, py, crop.type);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  drawSinglePlant(ctx, x, y, type) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    if (type === 'cabbage') {
+      // Outer darker leaves
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(-4, -2, 7, 0, Math.PI * 2);
+      ctx.arc(4, -2, 7, 0, Math.PI * 2);
+      ctx.arc(0, 5, 7, 0, Math.PI * 2);
+      ctx.fill();
+      // Inner head
+      ctx.fillStyle = '#86efac';
+      ctx.beginPath();
+      ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (type === 'lettuce') {
+      // Frilly vibrant lettuce
+      ctx.fillStyle = '#16a34a';
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#4ade80';
+      ctx.beginPath();
+      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#bbf7d0';
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (type === 'tomatoes') {
+      // Green bush with red tomato fruit dots
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+      // Red fruit
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-4, -3, 2.5, 0, Math.PI * 2);
+      ctx.arc(4, 2, 2.5, 0, Math.PI * 2);
+      ctx.arc(0, 4, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // Carrots / leafy greens
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 8, 5, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  drawPath(ctx) {
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    const drawLineSegments = (pts) => {
+      if (!pts || pts.length < 2) return;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.stroke();
+    };
+
+    // Outer contrasting road shoulder border
+    ctx.strokeStyle = '#3e2e21';
+    ctx.lineWidth = this.lineWidth + 8;
+    if (this.isDisjoint && this.disjointSegments) {
+      for (const seg of this.disjointSegments) {
+        drawLineSegments(seg);
+      }
+    } else {
+      drawLineSegments(this.points);
+    }
+
+    // Main Black Navigation Line (absorbs IR light)
+    ctx.strokeStyle = '#0a0d12';
+    ctx.lineWidth = this.lineWidth;
+    if (this.isDisjoint && this.disjointSegments) {
+      for (const seg of this.disjointSegments) {
+        drawLineSegments(seg);
+      }
+    } else {
+      drawLineSegments(this.points);
+    }
+
+    // High-tech subtle centerline guideline for visualization
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 6]);
+    if (this.isDisjoint && this.disjointSegments) {
+      for (const seg of this.disjointSegments) {
+        drawLineSegments(seg);
+      }
+    } else {
+      drawLineSegments(this.points);
+    }
+    ctx.setLineDash([]);
+
+    // If Scenario 4, draw dashed "WASHED OUT TRACK" indicator across the gap
+    if (this.isDisjoint) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(310, 260);
+      ctx.lineTo(405, 260);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f87171';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡ TRACK GAP (LINE LOST)', 357, 245);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  drawStartPoint(ctx) {
+    const sp = this.startPoint;
+    ctx.save();
+    ctx.translate(sp.x, sp.y);
+
+    // Green start pad circle
+    ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 26, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Start line bar
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(-3, -20, 6, 40);
+
+    ctx.fillStyle = '#34d399';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('START', 0, -28);
+
+    ctx.restore();
+  }
+
+  drawDestinationPad(ctx) {
+    const dp = this.destinationPoint;
+    ctx.save();
+    ctx.translate(dp.x, dp.y);
+
+    // Outer pulse ring
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, dp.radius + 4, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Pad base
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, dp.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Checkered center pattern
+    const cs = 7;
+    for (let r = -2; r <= 2; r++) {
+      for (let c = -2; c <= 2; c++) {
+        if ((r + c) % 2 === 0) {
+          ctx.fillStyle = '#f8fafc';
+        } else {
+          ctx.fillStyle = '#0f172a';
+        }
+        ctx.fillRect(c * cs - cs / 2, r * cs - cs / 2, cs, cs);
+      }
+    }
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('DEPOT / FINISH', 0, dp.radius + 15);
+
+    ctx.restore();
+  }
+
+  drawObstacle(ctx) {
+    const ob = this.obstacle;
+    ctx.save();
+    ctx.translate(ob.x, ob.y);
+
+    // Warning shadow
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 26, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wooden crate / obstacle box
+    ctx.fillStyle = '#854d0e';
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = 2;
+    ctx.fillRect(-ob.width / 2, -ob.height / 2, ob.width, ob.height);
+    ctx.strokeRect(-ob.width / 2, -ob.height / 2, ob.width, ob.height);
+
+    // X bracing on crate
+    ctx.strokeStyle = '#713f12';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-ob.width / 2, -ob.height / 2);
+    ctx.lineTo(ob.width / 2, ob.height / 2);
+    ctx.moveTo(ob.width / 2, -ob.height / 2);
+    ctx.lineTo(-ob.width / 2, ob.height / 2);
+    ctx.stroke();
+
+    // Label & Drag handle
+    ctx.fillStyle = '#fef08a';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('OBSTACLE', 0, -ob.height / 2 - 6);
+    ctx.fillText('(drag me)', 0, ob.height / 2 + 13);
+
+    ctx.restore();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.FarmTrack = FarmTrack;
+}
+
+
+/* === FILE: simulation\kinematics.js === */
+/**
+ * Kinematics & Robot Canvas Visualizer
+ * Renders the high-fidelity 2D Smart Farm Bot model:
+ * - Two motorized rubber drive wheels with tread rotation matching L298N output
+ * - ESP32 DevKit micro-controller board representation
+ * - Front sensor array: Left IR & Right IR with live optical emitter/receiver spots
+ * - HC-SR04 ultrasonic sensor with live distance detection cone
+ * - Front caster wheel and power LED indicators
+ */
+
+class RobotVisualizer {
+  constructor(robot) {
+    this.robot = robot;
+    this.showSensorBeams = true;
+    this.showUltrasonicCone = true;
+  }
+
+  /**
+   * Main render method for the Smart Farm Bot on canvas
+   * @param {CanvasRenderingContext2D} ctx 
+   * @param {FarmTrack} track 
+   * @param {number} ultrasonicDistCm 
+   */
+  draw(ctx, track, ultrasonicDistCm = 999) {
+    const r = this.robot;
+    ctx.save();
+    ctx.translate(r.x, r.y);
+    ctx.rotate(r.angle);
+
+    // 1. Draw Ultrasonic Sensor Detection Beam / Cone (if enabled)
+    if (this.showUltrasonicCone && track.obstacle.enabled) {
+      this.drawUltrasonicCone(ctx, ultrasonicDistCm);
+    }
+
+    // 2. Front IR Sensor Ground Projections
+    if (this.showSensorBeams) {
+      this.drawIRSensingBeams(ctx);
+    }
+
+    // 3. Drive Wheels (Left & Right)
+    this.drawWheels(ctx);
+
+    // 4. Main Robot Chassis
+    this.drawChassis(ctx);
+
+    // 5. ESP32 DevKit Representation on Chassis
+    this.drawESP32Board(ctx);
+
+    // 6. L298N Motor Driver Representation
+    this.drawL298NDriver(ctx);
+
+    // 7. Front Sensor Array (IR sensors + HC-SR04 eyes)
+    this.drawSensorArray(ctx);
+
+    // 8. Front Caster Wheel & Heading Arrow
+    this.drawCasterAndDirection(ctx);
+
+    ctx.restore();
+  }
+
+  drawUltrasonicCone(ctx, distCm) {
+    ctx.save();
+    const beamDistPx = Math.min(240, distCm);
+    const coneAngle = 0.38; // ~22 degrees beam spread
+    const startX = 32;      // front of robot
+
+    const grad = ctx.createRadialGradient(startX, 0, 5, startX + beamDistPx, 0, beamDistPx);
+    if (distCm < 30) {
+      grad.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+      grad.addColorStop(1, 'rgba(239, 68, 68, 0.05)');
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+    } else {
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.3)');
+      grad.addColorStop(1, 'rgba(56, 189, 248, 0.03)');
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+    }
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(startX, 0);
+    ctx.lineTo(startX + beamDistPx * Math.cos(coneAngle), beamDistPx * Math.sin(coneAngle));
+    ctx.arc(startX, 0, beamDistPx, coneAngle, -coneAngle, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Distance label floating on cone
+    if (distCm < 200) {
+      ctx.fillStyle = distCm < 30 ? '#f87171' : '#38bdf8';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${distCm.toFixed(1)} cm`, startX + beamDistPx / 2 - 14, -8);
+    }
+
+    ctx.restore();
+  }
+
+  drawIRSensingBeams(ctx) {
+    const r = this.robot;
+    ctx.save();
+
+    const drawIRSpot = (lateralOffset, forwardOffset, sensor, label) => {
+      ctx.save();
+      ctx.translate(forwardOffset, lateralOffset);
+
+      // Light beam ground circle
+      const isDetected = sensor.sensorValue === 1;
+      const spotColor = isDetected ? 'rgba(34, 197, 94, 0.75)' : 'rgba(239, 68, 68, 0.35)';
+      const coreColor = isDetected ? '#22c55e' : '#f87171';
+
+      ctx.fillStyle = spotColor;
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Optical beam core
+      ctx.fillStyle = coreColor;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tiny crosshair
+      ctx.strokeStyle = isDetected ? '#ffffff' : '#fca5a5';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-5, 0); ctx.lineTo(5, 0);
+      ctx.moveTo(0, -5); ctx.lineTo(0, 5);
+      ctx.stroke();
+
+      ctx.restore();
+    };
+
+    // Left IR (lateral -11px, forward 28px)
+    drawIRSpot(r.leftSensor.offsetLateral, r.leftSensor.offsetForward, r.leftSensor, 'L');
+    // Right IR (lateral +11px, forward 28px)
+    drawIRSpot(r.rightSensor.offsetLateral, r.rightSensor.offsetForward, r.rightSensor, 'R');
+
+    ctx.restore();
+  }
+
+  drawWheels(ctx) {
+    const r = this.robot;
+    const wheelW = 10;
+    const wheelL = 26;
+    const halfBase = r.wheelBase / 2;
+
+    const drawSingleWheel = (yOffset, angle) => {
+      ctx.save();
+      ctx.translate(0, yOffset);
+
+      // Tire body (dark rubber)
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(-wheelL / 2, -wheelW / 2, wheelL, wheelW, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      // Wheel Rim
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(-wheelL / 4, -wheelW / 4, wheelL / 2, wheelW / 2);
+
+      // Rotating tire treads
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      const numTreads = 4;
+      for (let i = 0; i < numTreads; i++) {
+        const treadPos = (((i / numTreads) + (angle / (Math.PI * 2)) % 1 + 1) % 1) * wheelL - wheelL / 2;
+        ctx.beginPath();
+        ctx.moveTo(treadPos, -wheelW / 2);
+        ctx.lineTo(treadPos, wheelW / 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    };
+
+    // Left Wheel (top in local coords: y = -halfBase)
+    drawSingleWheel(-halfBase, r.leftWheelAngle);
+    // Right Wheel (bottom in local coords: y = +halfBase)
+    drawSingleWheel(halfBase, r.rightWheelAngle);
+  }
+
+  drawChassis(ctx) {
+    const r = this.robot;
+    ctx.save();
+
+    // Chassis Acrylic/PCB Base
+    ctx.fillStyle = '#091e14'; // Forest tech acrylic green
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-r.chassisLength / 2, -r.chassisWidth / 2, r.chassisLength, r.chassisWidth, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    // Internal copper bus tracks on chassis
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-20, -14); ctx.lineTo(15, -14);
+    ctx.moveTo(-20, 14);  ctx.lineTo(15, 14);
+    ctx.moveTo(-15, -8);  ctx.lineTo(22, -8);
+    ctx.moveTo(-15, 8);   ctx.lineTo(22, 8);
+    ctx.stroke();
+
+    // Battery pack block at rear
+    ctx.fillStyle = '#1e293b';
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(-26, -15, 14, 30, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // Battery label
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 7px sans-serif';
+    ctx.save();
+    ctx.translate(-19, 0);
+    ctx.rotate(Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('11.1V', 0, 2);
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  drawESP32Board(ctx) {
+    ctx.save();
+    ctx.translate(6, 0);
+
+    // ESP32 PCB (Classic Matte Black / Blue DevKit)
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(-14, -13, 28, 26, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // ESP-WROOM-32 Metal RF Shield
+    ctx.fillStyle = '#94a3b8';
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(-10, -9, 14, 18, 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Antenna serpentine copper area
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(-13, -7, 2.5, 14);
+
+    // Micro-controller brand text
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESP32', -3, 2);
+
+    // Power & Status LEDs
+    const isRunning = this.robot.status === 'RUNNING';
+    const isError = this.robot.status === 'ERROR' || this.robot.status === 'ESTOP';
+
+    // Power LED (Red)
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath(); ctx.arc(10, -7, 1.8, 0, Math.PI * 2); ctx.fill();
+
+    // Activity LED (Blue/Cyan - Blinking when running)
+    const blink = isRunning ? (Math.floor(Date.now() / 150) % 2 === 0) : false;
+    ctx.fillStyle = isError ? '#f97316' : (blink ? '#38bdf8' : 'rgba(56, 189, 248, 0.2)');
+    ctx.beginPath(); ctx.arc(10, 7, 1.8, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+  }
+
+  drawL298NDriver(ctx) {
+    ctx.save();
+    ctx.translate(-8, 0);
+
+    // L298N Heat Sink (Black ribbed)
+    ctx.fillStyle = '#111827';
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 1;
+    ctx.fillRect(-5, -12, 7, 24);
+
+    // Heat sink fin slots
+    ctx.strokeStyle = '#374151';
+    for (let y = -9; y <= 9; y += 4) {
+      ctx.beginPath();
+      ctx.moveTo(-5, y);
+      ctx.lineTo(2, y);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  drawSensorArray(ctx) {
+    const r = this.robot;
+    ctx.save();
+
+    // Front sensor mounting bracket
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(25, -20, 5, 40);
+
+    // 1. HC-SR04 Ultrasonic Dual Transducer Eyes (Center front)
+    ctx.save();
+    ctx.translate(28, 0);
+
+    // Ultrasonic PCB
+    ctx.fillStyle = '#0369a1';
+    ctx.fillRect(0, -9, 4, 18);
+
+    // Left transducer cylinder
+    ctx.fillStyle = '#cbd5e1';
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(3, -5, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath(); ctx.arc(3, -5, 1.8, 0, Math.PI * 2); ctx.fill();
+
+    // Right transducer cylinder
+    ctx.fillStyle = '#cbd5e1';
+    ctx.strokeStyle = '#475569';
+    ctx.beginPath(); ctx.arc(3, 5, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath(); ctx.arc(3, 5, 1.8, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+
+    // 2. Left & Right IR Sensor Modules
+    const drawIRHardware = (yOffset, isDetected) => {
+      ctx.save();
+      ctx.translate(26, yOffset);
+
+      // Sensor module small PCB
+      ctx.fillStyle = '#065f46';
+      ctx.fillRect(0, -4, 4, 8);
+
+      // Emitter (Clear / Purple LED)
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath(); ctx.arc(3, -2, 1.8, 0, Math.PI * 2); ctx.fill();
+
+      // Phototransistor Receiver (Black LED)
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.arc(3, 2, 1.8, 0, Math.PI * 2); ctx.fill();
+
+      // Indicator LED (Green if detecting black line)
+      ctx.fillStyle = isDetected ? '#22c55e' : '#475569';
+      ctx.beginPath(); ctx.arc(-1, 0, 1.2, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore();
+    };
+
+    drawIRHardware(r.leftSensor.offsetLateral, r.leftSensor.sensorValue === 1);
+    drawIRHardware(r.rightSensor.offsetLateral, r.rightSensor.sensorValue === 1);
+
+    ctx.restore();
+  }
+
+  drawCasterAndDirection(ctx) {
+    ctx.save();
+    // Front omni caster ball
+    ctx.fillStyle = '#94a3b8';
+    ctx.beginPath();
+    ctx.arc(22, 0, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Directional chevron arrow on chassis
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(10, -5);
+    ctx.lineTo(16, 0);
+    ctx.lineTo(10, 5);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.RobotVisualizer = RobotVisualizer;
+}
+
+
+/* === FILE: simulation\hardware_model.js === */
+/**
+ * Hardware Architecture, ESP32 Pin-Level Simulation & L298N Motor Driver Model
+ * Provides detailed electronic models, pin states, logic voltages, and component inspection data.
+ */
+
+class HardwareSystemModel {
+  constructor() {
+    this.powerSource = {
+      batteryVoltage: 11.1,      // 3S Li-ion battery nominal
+      regulatedVoltage: 5.02,    // LM2596 buck converter output
+      espLogicVoltage: 3.30,     // ESP32 internal LDO regulator output
+      currentTotalAmps: 0.28
+    };
+
+    this.environmentalSensors = {
+      dht11TempC: 24.4,
+      dht11HumidityPct: 62.8,
+      ldrLux: 840,
+      soilMoisturePct: 39.2,
+      gpsLatitude: "12°58'23.4\" N",
+      gpsLongitude: "77°35'45.1\" E",
+      gpsSatellites: 9,
+      gpsFix: "3D Fix",
+      farmZone: "Sector 4B (Organic Greens)"
+    };
+
+    // ESP32 30-Pin DevKit Pin Map with descriptions, connection targets, and live electrical states
+    this.espPins = {
+      // Left Header Pins
+      "3V3":  { pin: "3V3",  type: "PWR_OUT", role: "3.3V Power Out", target: "IR Sensors & Sensors VCC", state: "HIGH", val: "3.3V" },
+      "EN":   { pin: "EN",   type: "CTRL",    role: "Chip Enable / Reset", target: "Pulled HIGH", state: "HIGH", val: "3.3V" },
+      "VP":   { pin: "VP",   type: "ADC_IN",  role: "ADC1_CH0 (GPIO36)", target: "LDR Light Sensor Analog", state: "ANALOG", val: "2.1V" },
+      "VN":   { pin: "VN",   type: "ADC_IN",  role: "ADC1_CH3 (GPIO39)", target: "Soil Moisture Sensor Analog", state: "ANALOG", val: "1.8V" },
+      "D34":  { pin: "D34",  type: "GPIO_IN", role: "Input (GPIO34)", target: "Left IR Sensor Digital OUT", state: "LOW", val: "0.0V" },
+      "D35":  { pin: "D35",  type: "GPIO_IN", role: "Input (GPIO35)", target: "Right IR Sensor Digital OUT", state: "LOW", val: "0.0V" },
+      "D32":  { pin: "D32",  type: "GPIO_OUT",role: "Output (GPIO32)", target: "Auxiliary Status LED", state: "LOW", val: "0.0V" },
+      "D33":  { pin: "D33",  type: "GPIO_OUT",role: "Output (GPIO33)", target: "L298N IN4 (Right Motor Dir B)", state: "LOW", val: "0.0V" },
+      "D25":  { pin: "D25",  type: "GPIO_OUT",role: "Output (GPIO25)", target: "L298N IN3 (Right Motor Dir A)", state: "LOW", val: "0.0V" },
+      "D26":  { pin: "D26",  type: "GPIO_OUT",role: "Output (GPIO26)", target: "L298N IN2 (Left Motor Dir B)", state: "LOW", val: "0.0V" },
+      "D27":  { pin: "D27",  type: "GPIO_OUT",role: "Output (GPIO27)", target: "L298N IN1 (Left Motor Dir A)", state: "LOW", val: "0.0V" },
+      "D14":  { pin: "D14",  type: "PWM_OUT", role: "PWM Out (GPIO14)", target: "L298N ENA (Left Motor Speed)", state: "PWM", val: "PWM 0" },
+      "D12":  { pin: "D12",  type: "PWM_OUT", role: "PWM Out (GPIO12)", target: "L298N ENB (Right Motor Speed)", state: "PWM", val: "PWM 0" },
+      "GND1": { pin: "GND",  type: "GND",     role: "Ground", target: "Common System Ground", state: "GND", val: "0.0V" },
+      "VIN":  { pin: "VIN",  type: "PWR_IN",  role: "5V Power Input", target: "LM2596 Step-Down Output (+5V)", state: "HIGH", val: "5.0V" },
+
+      // Right Header Pins
+      "GND2": { pin: "GND",  type: "GND",     role: "Ground", target: "Common Ground Bus", state: "GND", val: "0.0V" },
+      "D23":  { pin: "D23",  type: "GPIO",    role: "GPIO23 (VSPI MOSI)", target: "Expansion Header", state: "IDLE", val: "0.0V" },
+      "D22":  { pin: "D22",  type: "I2C",     role: "GPIO22 (I2C SCL)", target: "I2C Bus Clock (Optional)", state: "HIGH", val: "3.3V" },
+      "TX0":  { pin: "TX0",  type: "UART",    role: "GPIO1 (U0TXD)", target: "USB-UART Serial Console", state: "HIGH", val: "3.3V" },
+      "RX0":  { pin: "RX0",  type: "UART",    role: "GPIO3 (U0RXD)", target: "USB-UART Serial Console", state: "HIGH", val: "3.3V" },
+      "D21":  { pin: "D21",  type: "I2C",     role: "GPIO21 (I2C SDA)", target: "I2C Bus Data (Optional)", state: "HIGH", val: "3.3V" },
+      "D19":  { pin: "D19",  type: "GPIO",    role: "GPIO19 (VSPI MISO)", target: "Expansion Header", state: "IDLE", val: "0.0V" },
+      "D18":  { pin: "D18",  type: "GPIO_IN", role: "Input (GPIO18)", target: "HC-SR04 Ultrasonic Echo", state: "PULSE", val: "Echo" },
+      "D5":   { pin: "D5",   type: "GPIO_OUT",role: "Output (GPIO5)", target: "HC-SR04 Ultrasonic Trigger", state: "PULSE", val: "Trig 10us" },
+      "TX2":  { pin: "TX2",  type: "UART",    role: "GPIO17 (U2TXD)", target: "NEO-6M GPS Module RX", state: "HIGH", val: "3.3V" },
+      "RX2":  { pin: "RX2",  type: "UART",    role: "GPIO16 (U2RXD)", target: "NEO-6M GPS Module TX", state: "SERIAL", val: "NMEA" },
+      "D4":   { pin: "D4",   type: "GPIO_IO", role: "1-Wire (GPIO4)", target: "DHT11 Temp/Humidity Data", state: "DATA", val: "Single-bus" },
+      "D2":   { pin: "D2",   type: "GPIO_OUT",role: "Output (GPIO2)", target: "Onboard Blue Status LED", state: "BLINK", val: "Active" },
+      "D15":  { pin: "D15",  type: "GPIO",    role: "GPIO15", target: "Unassigned / Reserved", state: "IDLE", val: "0.0V" },
+      "GND3": { pin: "GND",  type: "GND",     role: "Ground", target: "Common Ground Bus", state: "GND", val: "0.0V" }
+    };
+
+    // L298N Dual H-Bridge Driver State
+    this.l298n = {
+      enaPwm: 0,
+      in1: 0,
+      in2: 0,
+      in3: 0,
+      in4: 0,
+      enbPwm: 0,
+      leftMode: "STOP",
+      rightMode: "STOP",
+      leftVoltage: 0,
+      rightVoltage: 0,
+      heatSinkTempC: 36.5
+    };
+
+    // Component Registry for Interactive Inspector
+    this.components = {
+      esp32: {
+        id: "esp32",
+        name: "ESP32 DevKit V1 (30-Pin)",
+        category: "Main Controller / Brain",
+        image: "microchip",
+        description: "Dual-core Xtensa 32-bit LX6 MCU running at 240MHz. Executes the Object-Oriented navigation algorithm, samples line sensors, calculates differential steering vectors, and outputs PWM signals to the L298N driver.",
+        voltage: "5.0V VIN (3.3V Logic)",
+        interfaces: "GPIO, ADC, PWM, UART, I2C, 1-Wire",
+        role: "Primary Brain",
+        connections: [
+          { from: "VIN / GND", to: "LM2596 Regulated 5V Output" },
+          { from: "GPIO 34 / 35", to: "Left & Right IR Sensors (Digital Line Inputs)" },
+          { from: "GPIO 14 / 12", to: "L298N ENA / ENB (Hardware PWM Speed Control)" },
+          { from: "GPIO 27, 26, 25, 33", to: "L298N IN1, IN2, IN3, IN4 (Direction Control H-Bridge)" },
+          { from: "GPIO 5 / 18", to: "HC-SR04 Ultrasonic Trigger / Echo (Obstacle Detection)" },
+          { from: "GPIO 4", to: "DHT11 Climate Sensor (1-Wire Bus)" },
+          { from: "GPIO 36 / 39", to: "LDR Light & Soil Moisture Analog Inputs" },
+          { from: "GPIO 16 / 17", to: "NEO-6M GPS Module UART2 (9600 Baud)" }
+        ]
+      },
+      battery: {
+        id: "battery",
+        name: "11.1V 3S Li-ion Battery Pack",
+        category: "Power Subsystem",
+        description: "2200mAh 3-cell Lithium-ion battery providing high-discharge current to the DC motors and step-down voltage regulator.",
+        voltage: "11.1V Nominal (12.6V Peak)",
+        interfaces: "XT60 / T-Plug DC Power Terminal",
+        role: "Main Energy Storage",
+        connections: [
+          { from: "+11.1V / GND", to: "LM2596 Buck Converter Input & L298N +12V Terminal" }
+        ]
+      },
+      lm2596: {
+        id: "lm2596",
+        name: "LM2596 DC-DC Step-Down Buck Converter",
+        category: "Power Subsystem",
+        description: "High-efficiency switching regulator stepping down 11.1V battery power to a clean, regulated 5.0V DC bus for the ESP32 and sensor modules.",
+        voltage: "Input: 11.1V DC -> Output: 5.02V DC (up to 3A)",
+        interfaces: "Screw Terminal Blocks",
+        role: "Voltage Regulation",
+        connections: [
+          { from: "IN+ / IN-", to: "11.1V Battery Output" },
+          { from: "OUT+ / OUT-", to: "ESP32 VIN pin, Sensor 5V rails, Common Ground" }
+        ]
+      },
+      irLeft: {
+        id: "irLeft",
+        name: "Left IR Line Sensor Module",
+        category: "Primary Navigation Sensor",
+        description: "Infrared reflective optical sensor consisting of an IR LED emitter and phototransistor receiver. Detects black guidance line via reduced infrared reflection.",
+        voltage: "3.3V - 5.0V DC",
+        interfaces: "Digital Output (Active HIGH on dark line) + Analog Reflectance",
+        role: "Left Path Tracking",
+        connections: [
+          { from: "VCC / GND", to: "ESP32 3.3V / GND" },
+          { from: "OUT", to: "ESP32 GPIO 34 (Input)" }
+        ]
+      },
+      irRight: {
+        id: "irRight",
+        name: "Right IR Line Sensor Module",
+        category: "Primary Navigation Sensor",
+        description: "Infrared reflective optical sensor paired with the left sensor. Together, they establish the differential line-following truth table.",
+        voltage: "3.3V - 5.0V DC",
+        interfaces: "Digital Output (Active HIGH on dark line) + Analog Reflectance",
+        role: "Right Path Tracking",
+        connections: [
+          { from: "VCC / GND", to: "ESP32 3.3V / GND" },
+          { from: "OUT", to: "ESP32 GPIO 35 (Input)" }
+        ]
+      },
+      l298n: {
+        id: "l298n",
+        name: "L298N Dual H-Bridge Motor Driver",
+        category: "Motor Actuation Subsystem",
+        description: "High-power motor driver capable of bidirectional differential speed control for two DC motors with up to 2A peak per channel and onboard heatsink.",
+        voltage: "Motor Power: 11.1V | Logic: 5.0V",
+        interfaces: "ENA/ENB PWM Headers, IN1-IN4 Direction Logic, Motor Terminal Blocks",
+        role: "Motor Control",
+        connections: [
+          { from: "+12V / GND", to: "11.1V Battery & Common Ground" },
+          { from: "ENA / ENB", to: "ESP32 GPIO 14 / GPIO 12 (PWM)" },
+          { from: "IN1 / IN2", to: "ESP32 GPIO 27 / GPIO 26 (Left Direction)" },
+          { from: "IN3 / IN4", to: "ESP32 GPIO 25 / GPIO 33 (Right Direction)" },
+          { from: "OUT1 / OUT2", to: "Left DC Geared Motor" },
+          { from: "OUT3 / OUT4", to: "Right DC Geared Motor" }
+        ]
+      },
+      motors: {
+        id: "motors",
+        name: "Dual DC Geared Motors (Left & Right)",
+        category: "Mechanical Propulsion",
+        description: "High-torque 1:48 gear ratio DC brushed motors delivering differential traction to navigate agricultural furrows and execute smooth pivot turns.",
+        voltage: "6V - 12V DC",
+        interfaces: "2-Wire High-Current Lead Pairs",
+        role: "Locomotion",
+        connections: [
+          { from: "Left Motor Leads", to: "L298N OUT1 & OUT2" },
+          { from: "Right Motor Leads", to: "L298N OUT3 & OUT4" }
+        ]
+      },
+      ultrasonic: {
+        id: "ultrasonic",
+        name: "HC-SR04 Ultrasonic Distance Sensor",
+        category: "Environmental Monitoring & Safety Extension",
+        description: "Sonar distance sensor emitting 40kHz ultrasonic bursts to measure distance to crop obstacles and farm debris in centimeters.",
+        voltage: "5.0V DC",
+        interfaces: "Trigger (Pulse) & Echo (Time-of-flight)",
+        role: "Obstacle Detection (Monitoring / Optional E-Brake)",
+        connections: [
+          { from: "VCC / GND", to: "5.0V Regulated Bus & Ground" },
+          { from: "TRIG", to: "ESP32 GPIO 5 (Output pulse)" },
+          { from: "ECHO", to: "ESP32 GPIO 18 (Input via voltage divider)" }
+        ]
+      },
+      dht11: {
+        id: "dht11",
+        name: "DHT11 Temperature & Humidity Sensor",
+        category: "Environmental Monitoring Extension",
+        description: "Digital sensor sampling ambient microclimate around the crops. Collects temperature (0-50°C) and relative humidity (20-90% RH).",
+        voltage: "3.3V - 5.0V DC",
+        interfaces: "1-Wire Serial Data Bus",
+        role: "Farm Microclimate Telemetry",
+        connections: [
+          { from: "DATA", to: "ESP32 GPIO 4" }
+        ]
+      },
+      ldr: {
+        id: "ldr",
+        name: "LDR Photoresistor Light Sensor",
+        category: "Environmental Monitoring Extension",
+        description: "Light-dependent resistor in a voltage divider configuration measuring solar illumination levels for photosynthetic analysis.",
+        voltage: "3.3V DC",
+        interfaces: "Analog Voltage (ADC1_CH0)",
+        role: "Solar Irradiance Telemetry",
+        connections: [
+          { from: "Analog OUT", to: "ESP32 GPIO 36 (VP / ADC)" }
+        ]
+      },
+      soil: {
+        id: "soil",
+        name: "Capacitive / Resistive Soil Moisture Sensor",
+        category: "Environmental Monitoring Extension",
+        description: "Probes soil water content between furrows to detect irrigation adequacy and drought spots.",
+        voltage: "3.3V DC",
+        interfaces: "Analog Voltage (ADC1_CH3)",
+        role: "Soil Hydration Telemetry",
+        connections: [
+          { from: "Analog OUT", to: "ESP32 GPIO 39 (VN / ADC)" }
+        ]
+      },
+      gps: {
+        id: "gps",
+        name: "NEO-6M GPS Satellite Module",
+        category: "Geographic Location Extension",
+        description: "Global positioning receiver with ceramic patch antenna providing latitude, longitude, speed over ground, and precision time for farm field mapping.",
+        voltage: "3.3V - 5.0V DC",
+        interfaces: "UART Serial (9600 Baud NMEA 0183)",
+        role: "Farm Geotagging & Fleet Tracking",
+        connections: [
+          { from: "TX / RX", to: "ESP32 GPIO 16 (RX2) & GPIO 17 (TX2)" }
+        ]
+      }
+    };
+  }
+
+  /**
+   * Updates electronic pin logic states and L298N states according to robot execution
+   * @param {Robot} robot 
+   * @param {number} ultrasonicDistCm 
+   */
+  update(robot, ultrasonicDistCm = 999) {
+    const leftIR = robot.leftSensor.sensorValue;
+    const rightIR = robot.rightSensor.sensorValue;
+    const leftMotor = robot.leftMotor;
+    const rightMotor = robot.rightMotor;
+
+    // 1. Update IR Input Pins
+    this.espPins["D34"].state = leftIR === 1 ? "HIGH" : "LOW";
+    this.espPins["D34"].val = leftIR === 1 ? "3.3V (Line)" : "0.0V (Soil)";
+
+    this.espPins["D35"].state = rightIR === 1 ? "HIGH" : "LOW";
+    this.espPins["D35"].val = rightIR === 1 ? "3.3V (Line)" : "0.0V (Soil)";
+
+    // 2. Update Motor Control Pins & L298N State
+    let in1 = 0, in2 = 0, in3 = 0, in4 = 0;
+
+    if (leftMotor.direction === "FORWARD") {
+      in1 = 1; in2 = 0;
+    } else if (leftMotor.direction === "BACKWARD") {
+      in1 = 0; in2 = 1;
+    }
+
+    if (rightMotor.direction === "FORWARD") {
+      in3 = 1; in4 = 0;
+    } else if (rightMotor.direction === "BACKWARD") {
+      in3 = 0; in4 = 1;
+    }
+
+    this.espPins["D27"].state = in1 ? "HIGH" : "LOW";
+    this.espPins["D27"].val = in1 ? "3.3V" : "0.0V";
+
+    this.espPins["D26"].state = in2 ? "HIGH" : "LOW";
+    this.espPins["D26"].val = in2 ? "3.3V" : "0.0V";
+
+    this.espPins["D25"].state = in3 ? "HIGH" : "LOW";
+    this.espPins["D25"].val = in3 ? "3.3V" : "0.0V";
+
+    this.espPins["D33"].state = in4 ? "HIGH" : "LOW";
+    this.espPins["D33"].val = in4 ? "3.3V" : "0.0V";
+
+    this.espPins["D14"].state = leftMotor.speed > 0 ? "PWM" : "LOW";
+    this.espPins["D14"].val = `PWM ${leftMotor.speed} (${Math.round((leftMotor.speed / 255) * 100)}%)`;
+
+    this.espPins["D12"].state = rightMotor.speed > 0 ? "PWM" : "LOW";
+    this.espPins["D12"].val = `PWM ${rightMotor.speed} (${Math.round((rightMotor.speed / 255) * 100)}%)`;
+
+    // 3. Update L298N Object
+    this.l298n.enaPwm = leftMotor.speed;
+    this.l298n.enbPwm = rightMotor.speed;
+    this.l298n.in1 = in1;
+    this.l298n.in2 = in2;
+    this.l298n.in3 = in3;
+    this.l298n.in4 = in4;
+    this.l298n.leftMode = leftMotor.direction;
+    this.l298n.rightMode = rightMotor.direction;
+    this.l298n.leftVoltage = (leftMotor.speed / 255) * 11.1;
+    this.l298n.rightVoltage = (rightMotor.speed / 255) * 11.1;
+
+    // 4. Update Ultrasonic & Extension Pins
+    this.espPins["D18"].val = `${ultrasonicDistCm.toFixed(1)} cm`;
+    this.espPins["D18"].state = ultrasonicDistCm < 30 ? "WARN" : "PULSE";
+
+    // 5. Environmental micro-fluctuations (realistic sensor dynamics)
+    this.environmentalSensors.dht11TempC = 24.3 + Math.sin(Date.now() / 8000) * 0.4;
+    this.environmentalSensors.dht11HumidityPct = 62.5 + Math.cos(Date.now() / 9000) * 0.8;
+    this.environmentalSensors.ldrLux = 830 + Math.floor(Math.sin(Date.now() / 6000) * 25);
+    this.environmentalSensors.soilMoisturePct = 39.0 + Math.sin(Date.now() / 12000) * 0.5;
+
+    // Battery slow discharge simulation
+    if (robot.status === "RUNNING") {
+      this.powerSource.currentTotalAmps = 0.35 + (leftMotor.speed + rightMotor.speed) / 510 * 0.5;
+    } else {
+      this.powerSource.currentTotalAmps = 0.12;
+    }
+  }
+
+  getComponentData(id) {
+    return this.components[id] || null;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.HardwareSystemModel = HardwareSystemModel;
+}
+
+
+/* === FILE: simulation\flowchart_state.js === */
+/**
+ * Navigation Flowchart & State Machine Synchronizer
+ * Maps the live robot state to the exact project flowchart blocks.
+ */
+
+class FlowchartSynchronizer {
+  constructor() {
+    this.currentNodeId = 'fc-start';
+    this.history = [];
+    this.nodeDescriptions = {
+      'fc-start': 'Initial robot power-up state awaiting user start command.',
+      'fc-init-bot': 'Booting ESP32 DevKit firmware and instantiating OOP classes (Robot, LineSensor, Motor, Controller).',
+      'fc-init-hw': 'Configuring GPIO 34/35 as inputs and GPIO 12/14/25/26/27/33 as motor driver outputs.',
+      'fc-read-sensors': 'LineSensor.readSensor() samples reflectance under Left & Right optical phototransistors.',
+      'fc-decision-line': 'Evaluating if either or both IR sensors detect the dark line path.',
+      'fc-line-pos': 'Determining line position: Both centered, Left drifted right, or Right drifted left.',
+      'fc-adjust-motors': 'Computing differential PWM signals for L298N motor driver based on truth table.',
+      'fc-move-line': 'Kinematic motion along the furrow path with active steering feedback.',
+      'fc-stop-bot': 'Both sensors lost line! Stopping forward propulsion to prevent wandering into crops.',
+      'fc-check-status': 'Inspecting recovery timer and sensor readings to verify if track is reachable.',
+      'fc-recovery': 'Executing oscillating angular search (sweep left 35°, sweep right 70°).',
+      'fc-decision-recovered': 'Testing if either IR sensor re-acquired the black line during recovery sweep.',
+      'fc-stop': 'Robot safely halted at depot destination, by user stop command, or upon safety timeout.'
+    };
+  }
+
+  /**
+   * Evaluates active flowchart block based on robot and controller state
+   * @param {Robot} robot 
+   * @param {Object} stepResult 
+   */
+  update(robot, stepResult = {}) {
+    let targetNode = 'fc-start';
+
+    if (robot.status === 'IDLE') {
+      targetNode = robot.elapsedSeconds > 0 ? 'fc-stop' : 'fc-start';
+    } else if (robot.status === 'COMPLETED' || robot.status === 'ERROR' || robot.status === 'ESTOP') {
+      targetNode = 'fc-stop';
+    } else if (robot.status === 'RUNNING') {
+      const left = robot.leftSensor.sensorValue;
+      const right = robot.rightSensor.sensorValue;
+
+      if (left === 1 || right === 1) {
+        // Line is detected
+        const decision = robot.controller.decision;
+        if (decision === 'MOVE_FORWARD' || decision === 'TURN_LEFT' || decision === 'TURN_RIGHT') {
+          // Cycle visually between read -> adjust -> move to show real-time loop
+          const phase = Math.floor((Date.now() / 250) % 3);
+          if (phase === 0) targetNode = 'fc-read-sensors';
+          else if (phase === 1) targetNode = 'fc-adjust-motors';
+          else targetNode = 'fc-move-line';
+        } else {
+          targetNode = 'fc-line-pos';
+        }
+      }
+    } else if (robot.status === 'LINE_LOST') {
+      if (robot.recoveryTimer < 0.4) {
+        targetNode = 'fc-stop-bot';
+      } else if (robot.recoveryTimer < 0.8) {
+        targetNode = 'fc-check-status';
+      } else {
+        targetNode = 'fc-recovery';
+      }
+    }
+
+    this.currentNodeId = targetNode;
+    return {
+      activeNodeId: targetNode,
+      description: this.nodeDescriptions[targetNode] || ''
+    };
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.FlowchartSynchronizer = FlowchartSynchronizer;
+}
+
+
+/* === FILE: simulation\inside_pipeline.js === */
+/**
+ * "Inside the Robot" Pipeline Visualizer & Diagnostic Reporter
+ * Details the step-by-step physical-to-logical translation:
+ * IR Sensors -> ESP32 -> Navigation Decision -> L298N Motor Driver -> Left/Right Motors -> Robot Movement
+ */
+
+class InsideRobotPipeline {
+  constructor() {
+    this.stages = [
+      { id: 'pipe-ir', name: '1. IR Sensors', title: 'Infrared Optical Array', icon: '📡' },
+      { id: 'pipe-esp', name: '2. ESP32 MCU', title: 'Brain & GPIO Sampling', icon: '🧠' },
+      { id: 'pipe-decision', name: '3. Decision Logic', title: 'Truth Table & OOP Controller', icon: '⚡' },
+      { id: 'pipe-l298n', name: '4. L298N Driver', title: 'Dual H-Bridge Power Switching', icon: '⚙️' },
+      { id: 'pipe-motors', name: '5. DC Motors', title: 'Torque & Wheel Rotation', icon: '🔄' },
+      { id: 'pipe-kinematics', name: '6. Field Motion', title: 'Differential Steering Vector', icon: '🚜' }
+    ];
+  }
+
+  /**
+   * Generates step-by-step diagnostic text and active highlight states
+   * @param {Robot} robot 
+   * @param {HardwareSystemModel} hwModel 
+   */
+  getPipelineStatus(robot, hwModel) {
+    const leftIR = robot.leftSensor.sensorValue;
+    const rightIR = robot.rightSensor.sensorValue;
+    const decision = robot.controller.decision;
+    const reason = robot.controller.reason;
+    const leftPwm = robot.leftMotor.speed;
+    const rightPwm = robot.rightMotor.speed;
+    const leftDir = robot.leftMotor.direction;
+    const rightDir = robot.rightMotor.direction;
+
+    let decisionLabel = 'IDLE';
+    let decisionBadgeClass = 'badge-idle';
+    let explanation = 'Robot is in standby mode awaiting user start instruction.';
+
+    if (robot.status === 'RUNNING') {
+      if (decision === 'MOVE_FORWARD') {
+        decisionLabel = 'DRIVE FORWARD';
+        decisionBadgeClass = 'badge-success';
+        explanation = `Both IR sensors detect the high-absorbance black line (Left: 1, Right: 1). ESP32 commands equal PWM (${leftPwm} / 255) to both motors. Robot drives straight along the furrow path.`;
+      } else if (decision === 'TURN_LEFT') {
+        decisionLabel = 'CORRECT LEFT';
+        decisionBadgeClass = 'badge-warning';
+        explanation = `Left IR detects line (1), but Right IR drifted off onto soil (0). ESP32 throttles Left Motor to PWM ${leftPwm} while running Right Motor at PWM ${rightPwm}. Differential velocity pivots robot smoothly to the left back onto track.`;
+      } else if (decision === 'TURN_RIGHT') {
+        decisionLabel = 'CORRECT RIGHT';
+        decisionBadgeClass = 'badge-warning';
+        explanation = `Right IR detects line (1), but Left IR drifted off onto soil (0). ESP32 powers Left Motor at PWM ${leftPwm} and slows Right Motor to PWM ${rightPwm}. Differential velocity pivots robot right back onto track.`;
+      }
+    } else if (robot.status === 'LINE_LOST') {
+      decisionLabel = 'LINE LOST RECOVERY';
+      decisionBadgeClass = 'badge-danger';
+      explanation = `Both IR sensors read 0 (off line). Robot stops forward drive and initiates controlled angular sweep (${robot.recoveryPhase}, timer: ${robot.recoveryTimer.toFixed(1)}s) to re-acquire track.`;
+    } else if (robot.status === 'COMPLETED') {
+      decisionLabel = 'DESTINATION REACHED';
+      decisionBadgeClass = 'badge-complete';
+      explanation = `Smart Farm Bot has safely reached the farm destination depot pad! Motors braked to 0 RPM.`;
+    } else if (robot.status === 'ESTOP') {
+      decisionLabel = 'EMERGENCY STOP';
+      decisionBadgeClass = 'badge-danger';
+      explanation = `Emergency Stop triggered. L298N driver inputs forced to LOW and PWM duty cut to 0%. All locomotion immediately halted.`;
+    }
+
+    return {
+      stages: [
+        {
+          id: 'pipe-ir',
+          value: `L: ${leftIR === 1 ? 'LINE (1)' : 'SOIL (0)'} | R: ${rightIR === 1 ? 'LINE (1)' : 'SOIL (0)'}`,
+          subtext: `Analog: L=${robot.leftSensor.analogValue} | R=${robot.rightSensor.analogValue}`,
+          active: robot.status === 'RUNNING' || robot.status === 'LINE_LOST'
+        },
+        {
+          id: 'pipe-esp',
+          value: `GPIO34: ${leftIR ? 'HIGH' : 'LOW'} | GPIO35: ${rightIR ? 'HIGH' : 'LOW'}`,
+          subtext: `Sampling at 60Hz | 3.3V Logic`,
+          active: robot.status === 'RUNNING' || robot.status === 'LINE_LOST'
+        },
+        {
+          id: 'pipe-decision',
+          value: decisionLabel,
+          subtext: `Rule: [${leftIR}, ${rightIR}] -> ${decision}`,
+          active: true,
+          badgeClass: decisionBadgeClass
+        },
+        {
+          id: 'pipe-l298n',
+          value: `ENA: ${leftPwm} PWM | ENB: ${rightPwm} PWM`,
+          subtext: `IN1-4: [${hwModel.l298n.in1}, ${hwModel.l298n.in2}, ${hwModel.l298n.in3}, ${hwModel.l298n.in4}]`,
+          active: leftPwm > 0 || rightPwm > 0
+        },
+        {
+          id: 'pipe-motors',
+          value: `L: ${leftDir} (${robot.leftMotor.rpm} RPM) | R: ${rightDir} (${robot.rightMotor.rpm} RPM)`,
+          subtext: `Terminal: L=${hwModel.l298n.leftVoltage.toFixed(1)}V | R=${hwModel.l298n.rightVoltage.toFixed(1)}V`,
+          active: robot.leftMotor.rpm > 0 || robot.rightMotor.rpm > 0
+        },
+        {
+          id: 'pipe-kinematics',
+          value: `v = ${robot.speed.toFixed(1)} cm/s | Heading: ${(robot.angle * 180 / Math.PI).toFixed(0)}°`,
+          subtext: `Pos: (${Math.round(robot.x)}, ${Math.round(robot.y)}) | Dist: ${robot.distanceTraveledMeters.toFixed(2)}m`,
+          active: robot.speed > 0 || robot.status === 'LINE_LOST'
+        }
+      ],
+      decisionLabel,
+      explanation
+    };
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.InsideRobotPipeline = InsideRobotPipeline;
+}
+
+
+/* === FILE: app.js === */
+/**
+ * Object-Oriented Smart Farm Bot
+ * Main Application Orchestrator & UI Controller
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Initialize Simulation Entities
+  const canvas = document.getElementById('farmCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const track = new FarmTrack(canvas.width, canvas.height);
+  const robot = new Robot(track.startPoint.x, track.startPoint.y, track.startPoint.angle);
+  const visualizer = new RobotVisualizer(robot);
+  const hwModel = new HardwareSystemModel();
+  const flowchart = new FlowchartSynchronizer();
+  const pipeline = new InsideRobotPipeline();
+
+  // Simulation loop state
+  let isRunning = false;
+  let isPaused = false;
+  let simSpeedMultiplier = 1;
+  let lastTimestamp = performance.now();
+  let ultrasonicDistCm = 250;
+
+  // Log buffer
+  const eventLogs = [];
+
+  // ==========================================================================
+  // EVENT LOG MANAGER
+  // ==========================================================================
+  function addLog(category, type, message) {
+    const elapsed = robot.elapsedSeconds;
+    const mins = Math.floor(elapsed / 60);
+    const secs = (elapsed % 60).toFixed(1);
+    const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(4, '0')}`;
+
+    const entry = { timeStr, category, type, message, id: Date.now() + Math.random() };
+    eventLogs.push(entry);
+    if (eventLogs.length > 120) eventLogs.shift();
+
+    renderLogEntry(entry);
+  }
+
+  function renderLogEntry(entry) {
+    const logBox = document.getElementById('logStreamBox');
+    const filter = document.getElementById('logFilter').value;
+
+    if (filter !== 'ALL' && entry.category !== filter) return;
+
+    const row = document.createElement('div');
+    row.className = 'log-row';
+
+    let badgeClass = 'badge-info';
+    if (entry.type === 'ACTION') badgeClass = 'badge-action';
+    else if (entry.type === 'WARN') badgeClass = 'badge-warn';
+    else if (entry.type === 'ALARM') badgeClass = 'badge-alarm';
+
+    row.innerHTML = `
+      <span class="log-time">${entry.timeStr}</span>
+      <span class="log-badge ${badgeClass}">${entry.category}</span>
+      <span class="log-message">${entry.message}</span>
+    `;
+    logBox.appendChild(row);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function refreshLogs() {
+    const logBox = document.getElementById('logStreamBox');
+    logBox.innerHTML = '';
+    const filter = document.getElementById('logFilter').value;
+    const filtered = filter === 'ALL' ? eventLogs : eventLogs.filter(e => e.category === filter);
+    for (const entry of filtered) {
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      let badgeClass = 'badge-info';
+      if (entry.type === 'ACTION') badgeClass = 'badge-action';
+      else if (entry.type === 'WARN') badgeClass = 'badge-warn';
+      else if (entry.type === 'ALARM') badgeClass = 'badge-alarm';
+
+      row.innerHTML = `
+        <span class="log-time">${entry.timeStr}</span>
+        <span class="log-badge ${badgeClass}">${entry.category}</span>
+        <span class="log-message">${entry.message}</span>
+      `;
+      logBox.appendChild(row);
+    }
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  // Initial Boot Logs
+  addLog('SYSTEM', 'INFO', 'ESP32 DevKit V1 Initialized. Firmware v2.4 booted.');
+  addLog('SYSTEM', 'INFO', 'L298N Dual H-Bridge & Optical Sensors Online.');
+  addLog('NAV', 'INFO', 'Scenario 1 Loaded: Straight Agricultural Row.');
+
+  // ==========================================================================
+  // SCENARIO MANAGEMENT
+  // ==========================================================================
+  const scenarioBtns = document.querySelectorAll('.scenario-btn');
+  const scenarioDesc = document.getElementById('scenarioDescription');
+
+  function selectScenario(id) {
+    scenarioBtns.forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.scenario) === id);
+    });
+
+    const scn = track.loadScenario(id);
+    scenarioDesc.textContent = scn.description;
+
+    robot.reset(track.startPoint.x, track.startPoint.y, track.startPoint.angle);
+    isRunning = false;
+    isPaused = false;
+    updateControlButtons();
+    addLog('NAV', 'INFO', `Switched to ${scn.title}`);
+  }
+
+  scenarioBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectScenario(parseInt(btn.dataset.scenario));
+    });
+  });
+
+  // ==========================================================================
+  // PRIMARY CONTROLS (START, PAUSE, STOP, RESET, E-STOP)
+  // ==========================================================================
+  const btnStart = document.getElementById('btnStart');
+  const btnPause = document.getElementById('btnPause');
+  const btnStop = document.getElementById('btnStop');
+  const btnReset = document.getElementById('btnReset');
+  const btnEStop = document.getElementById('btnEStop');
+
+  function updateControlButtons() {
+    btnStart.disabled = isRunning && !isPaused;
+    btnPause.disabled = !isRunning;
+    btnStop.disabled = !isRunning && robot.status === 'IDLE';
+
+    if (isPaused) {
+      btnPause.innerHTML = '<span>▶</span> RESUME';
+      btnPause.classList.add('ctrl-btn-start');
+    } else {
+      btnPause.innerHTML = '<span>⏸</span> PAUSE';
+      btnPause.classList.remove('ctrl-btn-start');
+    }
+  }
+
+  btnStart.addEventListener('click', () => {
+    if (isPaused) {
+      isPaused = false;
+      robot.resume();
+      addLog('NAV', 'ACTION', 'Autonomous route resumed.');
+    } else {
+      isRunning = true;
+      isPaused = false;
+      robot.start();
+      addLog('NAV', 'ACTION', 'Smart Farm Bot started navigation cycle.');
+    }
+    updateControlButtons();
+  });
+
+  btnPause.addEventListener('click', () => {
+    if (!isRunning) return;
+    if (!isPaused) {
+      isPaused = true;
+      robot.pause();
+      addLog('NAV', 'WARN', 'Simulation paused by user.');
+    } else {
+      isPaused = false;
+      robot.resume();
+      addLog('NAV', 'ACTION', 'Simulation resumed.');
+    }
+    updateControlButtons();
+  });
+
+  btnStop.addEventListener('click', () => {
+    isRunning = false;
+    isPaused = false;
+    robot.stop('User commanded stop');
+    addLog('NAV', 'WARN', 'Robot stopped safely by user command.');
+    updateControlButtons();
+  });
+
+  btnReset.addEventListener('click', () => {
+    isRunning = false;
+    isPaused = false;
+    robot.reset(track.startPoint.x, track.startPoint.y, track.startPoint.angle);
+    addLog('NAV', 'INFO', 'Robot reset to scenario start point.');
+    updateControlButtons();
+  });
+
+  btnEStop.addEventListener('click', () => {
+    isRunning = false;
+    isPaused = false;
+    robot.emergencyStop();
+    addLog('WARN', 'ALARM', '⚠️ EMERGENCY STOP TRIGGERED! Power cut to all motors.');
+    updateControlButtons();
+  });
+
+  // Base Motor PWM Slider
+  const pwmSlider = document.getElementById('pwmSlider');
+  const pwmSliderVal = document.getElementById('pwmSliderVal');
+  pwmSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    pwmSliderVal.textContent = val;
+    robot.controller.basePwm = val;
+    robot.controller.turnPwmHigh = Math.min(255, val + 20);
+    robot.controller.turnPwmLow = Math.max(20, Math.round(val * 0.25));
+  });
+
+  // Simulation Speed Multipliers
+  const multiplierBtns = document.querySelectorAll('.multiplier-btn');
+  multiplierBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      multiplierBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      simSpeedMultiplier = parseInt(btn.dataset.speed);
+      addLog('SYSTEM', 'INFO', `Simulation timestep rate set to ${simSpeedMultiplier}×`);
+    });
+  });
+
+  // Overlay Tools
+  const toggleBeamsBtn = document.getElementById('toggleBeamsBtn');
+  toggleBeamsBtn.addEventListener('click', () => {
+    visualizer.showSensorBeams = !visualizer.showSensorBeams;
+    toggleBeamsBtn.classList.toggle('active', visualizer.showSensorBeams);
+  });
+
+  const toggleConeBtn = document.getElementById('toggleConeBtn');
+  toggleConeBtn.addEventListener('click', () => {
+    visualizer.showUltrasonicCone = !visualizer.showUltrasonicCone;
+    toggleConeBtn.classList.toggle('active', visualizer.showUltrasonicCone);
+  });
+
+  const toggleAvoidanceBtn = document.getElementById('toggleAvoidanceBtn');
+  toggleAvoidanceBtn.addEventListener('click', () => {
+    robot.controller.obstacleAvoidanceEnabled = !robot.controller.obstacleAvoidanceEnabled;
+    const isEn = robot.controller.obstacleAvoidanceEnabled;
+    toggleAvoidanceBtn.classList.toggle('active', isEn);
+    toggleAvoidanceBtn.innerHTML = `<span>🛑</span> Avoidance Brake: ${isEn ? 'ON' : 'OFF'}`;
+    const badge = document.getElementById('badgeUltrasonic');
+    badge.textContent = isEn ? 'AVOIDANCE ACTIVE' : 'MONITORING';
+    badge.style.color = isEn ? '#f87171' : '#38bdf8';
+    addLog('SENSOR', isEn ? 'WARN' : 'INFO', `Autonomous obstacle avoidance ${isEn ? 'ENABLED' : 'DISABLED (Monitoring only)'}`);
+  });
+
+  const canvasResetPoseBtn = document.getElementById('canvasResetPoseBtn');
+  canvasResetPoseBtn.addEventListener('click', () => {
+    robot.reset(track.startPoint.x, track.startPoint.y, track.startPoint.angle);
+    isRunning = false;
+    isPaused = false;
+    updateControlButtons();
+  });
+
+  // ==========================================================================
+  // DRAGGABLE OBSTACLE INTERACTION ON CANVAS
+  // ==========================================================================
+  let isDraggingObstacle = false;
+
+  function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (!track.obstacle.enabled) return;
+    const pos = getCanvasCoords(e);
+    const ob = track.obstacle;
+    if (Math.hypot(pos.x - ob.x, pos.y - ob.y) < 30) {
+      isDraggingObstacle = true;
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDraggingObstacle) return;
+    const pos = getCanvasCoords(e);
+    track.obstacle.x = Math.max(30, Math.min(canvas.width - 30, pos.x));
+    track.obstacle.y = Math.max(30, Math.min(canvas.height - 30, pos.y));
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDraggingObstacle) {
+      isDraggingObstacle = false;
+      canvas.style.cursor = 'crosshair';
+      addLog('SENSOR', 'INFO', `Obstacle repositioned to (${Math.round(track.obstacle.x)}, ${Math.round(track.obstacle.y)})`);
+    }
+  });
+
+  // Touch Support
+  canvas.addEventListener('touchstart', (e) => {
+    if (!track.obstacle.enabled) return;
+    const pos = getCanvasCoords(e);
+    const ob = track.obstacle;
+    if (Math.hypot(pos.x - ob.x, pos.y - ob.y) < 30) {
+      isDraggingObstacle = true;
+    }
+  });
+  window.addEventListener('touchmove', (e) => {
+    if (!isDraggingObstacle) return;
+    const pos = getCanvasCoords(e);
+    track.obstacle.x = Math.max(30, Math.min(canvas.width - 30, pos.x));
+    track.obstacle.y = Math.max(30, Math.min(canvas.height - 30, pos.y));
+  });
+  window.addEventListener('touchend', () => { isDraggingObstacle = false; });
+
+  // ==========================================================================
+  // TAB NAVIGATION & COMPONENT INSPECTOR
+  // ==========================================================================
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+
+      btn.classList.add('active');
+      const target = document.getElementById(btn.dataset.tab);
+      if (target) target.classList.add('active');
+    });
+  });
+
+  // Component Inspector Modal
+  const compModal = document.getElementById('compModal');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalCategory = document.getElementById('modalCategory');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalVoltage = document.getElementById('modalVoltage');
+  const modalInterface = document.getElementById('modalInterface');
+  const modalRole = document.getElementById('modalRole');
+  const modalTelemetry = document.getElementById('modalTelemetry');
+  const modalConnections = document.getElementById('modalConnections');
+
+  function openComponentModal(compId) {
+    const comp = hwModel.getComponentData(compId);
+    if (!comp) return;
+
+    modalTitle.textContent = comp.name;
+    modalCategory.textContent = comp.category;
+    modalDesc.textContent = comp.description;
+    modalVoltage.textContent = comp.voltage;
+    modalInterface.textContent = comp.interfaces;
+    modalRole.textContent = comp.role;
+
+    if (compId === 'esp32') {
+      modalTelemetry.textContent = `240MHz Active | RAM 520KB | Status: ${robot.status}`;
+    } else if (compId === 'l298n') {
+      modalTelemetry.textContent = `ENA: ${robot.leftMotor.speed} | ENB: ${robot.rightMotor.speed} | Heatsink: 36.5°C`;
+    } else if (compId === 'irLeft') {
+      modalTelemetry.textContent = `Digital: ${robot.leftSensor.sensorValue} | ADC: ${robot.leftSensor.analogValue}`;
+    } else if (compId === 'irRight') {
+      modalTelemetry.textContent = `Digital: ${robot.rightSensor.sensorValue} | ADC: ${robot.rightSensor.analogValue}`;
+    } else if (compId === 'ultrasonic') {
+      modalTelemetry.textContent = `Distance: ${ultrasonicDistCm.toFixed(1)} cm`;
+    } else {
+      modalTelemetry.textContent = 'Operational (Simulated)';
+    }
+
+    modalConnections.innerHTML = '';
+    comp.connections.forEach(conn => {
+      const item = document.createElement('div');
+      item.style.padding = '3px 0';
+      item.innerHTML = `<span style="color: var(--accent-cyan-bright);">${conn.from}</span> ➔ <span style="color: #ffffff;">${conn.to}</span>`;
+      modalConnections.appendChild(item);
+    });
+
+    compModal.classList.add('open');
+  }
+
+  modalCloseBtn.addEventListener('click', () => compModal.classList.remove('open'));
+  compModal.addEventListener('click', (e) => {
+    if (e.target === compModal) compModal.classList.remove('open');
+  });
+
+  // Attach click listener to Hardware Diagram SVG nodes
+  document.querySelectorAll('.hw-node').forEach(node => {
+    node.addEventListener('click', () => {
+      openComponentModal(node.dataset.compId);
+    });
+  });
+
+  // Log filter and clear
+  document.getElementById('logFilter').addEventListener('change', refreshLogs);
+  document.getElementById('clearLogBtn').addEventListener('click', () => {
+    eventLogs.length = 0;
+    document.getElementById('logStreamBox').innerHTML = '';
+  });
+
+  // ==========================================================================
+  // ESP32 DEV-KIT PINOUT DOM BUILDER
+  // ==========================================================================
+  const espLeftContainer = document.getElementById('espLeftPins');
+  const espRightContainer = document.getElementById('espRightPins');
+
+  const leftPinKeys = ["3V3", "EN", "VP", "VN", "D34", "D35", "D32", "D33", "D25", "D26", "D27", "D14", "D12", "GND1", "VIN"];
+  const rightPinKeys = ["GND2", "D23", "D22", "TX0", "RX0", "D21", "D19", "D18", "D5", "TX2", "RX2", "D4", "D2", "D15", "GND3"];
+
+  function buildPinHeader(container, keys) {
+    container.innerHTML = '';
+    keys.forEach(key => {
+      const p = hwModel.espPins[key];
+      const row = document.createElement('div');
+      row.className = 'esp-pin-row';
+      row.id = `pinRow_${key}`;
+      row.title = `${p.role} -> ${p.target}`;
+      row.innerHTML = `
+        <span class="esp-pin-label">${p.pin}</span>
+        <span class="esp-pin-target">${p.target}</span>
+        <span class="esp-pin-led" id="pinLed_${key}"></span>
+      `;
+      row.addEventListener('click', () => {
+        // Find component associated with this pin
+        if (key === 'D34') openComponentModal('irLeft');
+        else if (key === 'D35') openComponentModal('irRight');
+        else if (['D14', 'D12', 'D27', 'D26', 'D25', 'D33'].includes(key)) openComponentModal('l298n');
+        else if (key === 'D18' || key === 'D5') openComponentModal('ultrasonic');
+        else if (key === 'D4') openComponentModal('dht11');
+        else if (key === 'VP') openComponentModal('ldr');
+        else if (key === 'VN') openComponentModal('soil');
+        else if (key === 'TX2' || key === 'RX2') openComponentModal('gps');
+        else openComponentModal('esp32');
+      });
+      container.appendChild(row);
+    });
+  }
+
+  buildPinHeader(espLeftContainer, leftPinKeys);
+  buildPinHeader(espRightContainer, rightPinKeys);
+
+  // ==========================================================================
+  // REAL-TIME UPDATE & RENDER LOOP
+  // ==========================================================================
+  let lastLoggedDecision = null;
+  let lastLoggedStatus = null;
+
+  function updateSimulation(dt) {
+    // 1. Calculate Ultrasonic Raycast Distance
+    const rx = robot.x + 28 * Math.cos(robot.angle);
+    const ry = robot.y + 28 * Math.sin(robot.angle);
+    ultrasonicDistCm = track.getUltrasonicDistance(rx, ry, robot.angle);
+
+    // 2. Physics & Robot Kinematics Step
+    let stepResult = {};
+    if (isRunning && !isPaused) {
+      stepResult = robot.move(track, ultrasonicDistCm, dt);
+
+      // Log Decision Transitions
+      if (robot.controller.decision !== lastLoggedDecision) {
+        lastLoggedDecision = robot.controller.decision;
+        if (robot.controller.decision === 'MOVE_FORWARD') {
+          addLog('NAV', 'ACTION', 'Line centered. Driving forward.');
+        } else if (robot.controller.decision === 'TURN_LEFT') {
+          addLog('NAV', 'ACTION', 'Veering left to correct course.');
+        } else if (robot.controller.decision === 'TURN_RIGHT') {
+          addLog('NAV', 'ACTION', 'Veering right to correct course.');
+        } else if (robot.controller.decision === 'LINE_LOST') {
+          addLog('WARN', 'WARN', 'Track line lost! Initiating recovery sweep.');
+        } else if (robot.controller.decision === 'STOP_OBSTACLE') {
+          addLog('WARN', 'ALARM', `Obstacle detected at ${ultrasonicDistCm.toFixed(1)} cm! Emergency brake applied.`);
+        }
+      }
+
+      // Check Status Transitions
+      if (robot.status !== lastLoggedStatus) {
+        lastLoggedStatus = robot.status;
+        if (robot.status === 'COMPLETED') {
+          addLog('NAV', 'ACTION', '🏆 Destination depot reached! Mission completed successfully.');
+          isRunning = false;
+          updateControlButtons();
+        } else if (robot.status === 'ERROR') {
+          addLog('WARN', 'ALARM', 'Recovery search timeout! Robot safely halted. Manual intervention required.');
+          isRunning = false;
+          updateControlButtons();
+        }
+      }
+    }
+
+    // 3. Update Hardware Model Pins & Voltages
+    hwModel.update(robot, ultrasonicDistCm);
+
+    // 4. Update Flowchart State Synchronizer
+    const fcState = flowchart.update(robot, stepResult);
+
+    // 5. Update UI DOM Elements
+    updateDOM(fcState);
+  }
+
+  function updateDOM(fcState) {
+    // Top Status Header
+    const statusPill = document.getElementById('headerRobotStatus');
+    statusPill.textContent = robot.status;
+    statusPill.className = `status-pill pill-${robot.status.toLowerCase().replace('_', '')}`;
+
+    const connDot = document.getElementById('headerConnDot');
+    connDot.className = `status-dot ${robot.status === 'RUNNING' ? 'running' : (robot.status === 'LINE_LOST' ? 'line-lost' : (robot.status === 'ESTOP' ? 'estop' : 'connected'))}`;
+
+    document.getElementById('headerCurrentDraw').textContent = `${hwModel.powerSource.currentTotalAmps.toFixed(2)} A`;
+
+    // Canvas HUD
+    document.getElementById('hudCoords').textContent = `POS: (${Math.round(robot.x)}, ${Math.round(robot.y)}) | HEADING: ${(robot.angle * 180 / Math.PI).toFixed(0)}°`;
+    document.getElementById('hudUltrasonic').textContent = `HC-SR04: ${ultrasonicDistCm.toFixed(1)} cm ${ultrasonicDistCm < 30 ? '(OBSTACLE CLOSE)' : '(Clear)'}`;
+
+    // Telemetry Cards
+    document.getElementById('telemetryPos').textContent = `${Math.round(robot.x)}, ${Math.round(robot.y)}`;
+    document.getElementById('telemetryDist').textContent = `Dist: ${robot.distanceTraveledMeters.toFixed(2)} m`;
+    document.getElementById('telemetryHeading').textContent = `${(robot.angle * 180 / Math.PI).toFixed(1)}°`;
+
+    // Cardinal Heading
+    const deg = ((robot.angle * 180 / Math.PI) % 360 + 360) % 360;
+    let card = 'East';
+    if (deg > 45 && deg <= 135) card = 'South';
+    else if (deg > 135 && deg <= 225) card = 'West';
+    else if (deg > 225 && deg <= 315) card = 'North';
+    document.getElementById('telemetryCompass').textContent = `${card} (Bearing)`;
+
+    document.getElementById('telemetrySpeed').textContent = `${robot.speed.toFixed(1)} cm/s`;
+    document.getElementById('telemetryState').textContent = `Motors: ${robot.leftMotor.direction} / ${robot.rightMotor.direction}`;
+
+    const elapsed = robot.elapsedSeconds;
+    const mins = Math.floor(elapsed / 60);
+    const secs = (elapsed % 60).toFixed(1);
+    document.getElementById('telemetryTime').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(4, '0')}`;
+
+    // Sensor Dashboard Strip
+    const leftIR = robot.leftSensor.sensorValue;
+    const rightIR = robot.rightSensor.sensorValue;
+
+    document.getElementById('valLeftIR').textContent = leftIR === 1 ? 'LINE (1)' : 'SOIL (0)';
+    document.getElementById('valLeftIR').style.color = leftIR === 1 ? 'var(--accent-green-bright)' : '#94a3b8';
+    document.getElementById('dotLeftIR').className = `sensor-indicator-dot ${leftIR === 1 ? 'active' : ''}`;
+    document.getElementById('tileLeftIR').classList.toggle('active-line', leftIR === 1);
+    document.getElementById('adcLeftIR').textContent = `ADC: ${robot.leftSensor.analogValue}`;
+
+    document.getElementById('valRightIR').textContent = rightIR === 1 ? 'LINE (1)' : 'SOIL (0)';
+    document.getElementById('valRightIR').style.color = rightIR === 1 ? 'var(--accent-green-bright)' : '#94a3b8';
+    document.getElementById('dotRightIR').className = `sensor-indicator-dot ${rightIR === 1 ? 'active' : ''}`;
+    document.getElementById('tileRightIR').classList.toggle('active-line', rightIR === 1);
+    document.getElementById('adcRightIR').textContent = `ADC: ${robot.rightSensor.analogValue}`;
+
+    // Ultrasonic
+    document.getElementById('valUltrasonic').textContent = `${ultrasonicDistCm.toFixed(1)} cm`;
+    const pct = Math.min(100, Math.max(0, (ultrasonicDistCm / 200) * 100));
+    const fill = document.getElementById('meterFillUltrasonic');
+    fill.style.width = `${pct}%`;
+    fill.className = `distance-meter-fill ${ultrasonicDistCm < 30 ? 'danger' : ''}`;
+
+    // Environmental Sensors
+    document.getElementById('valDHT11').textContent = `${hwModel.environmentalSensors.dht11TempC.toFixed(1)}°C | ${hwModel.environmentalSensors.dht11HumidityPct.toFixed(1)}%`;
+    document.getElementById('valLdrSoil').textContent = `${hwModel.environmentalSensors.ldrLux} Lux | ${hwModel.environmentalSensors.soilMoisturePct.toFixed(1)}% H2O`;
+
+    // ------------------------------------------------------------------------
+    // TAB 1: INSIDE THE ROBOT PIPELINE
+    // ------------------------------------------------------------------------
+    const pipeData = pipeline.getPipelineStatus(robot, hwModel);
+    const pBadge = document.getElementById('pipeDecisionBadge');
+    pBadge.textContent = pipeData.decisionLabel;
+    pBadge.className = `decision-badge ${pipeData.stages[2].badgeClass || 'badge-idle'}`;
+    document.getElementById('pipeExplanationText').textContent = pipeData.explanation;
+
+    pipeData.stages.forEach((stg, idx) => {
+      const box = document.getElementById(`pStage${idx + 1}`);
+      if (box) {
+        box.classList.toggle('active', !!stg.active);
+        const valElem = document.getElementById(`pStage${idx + 1}Val`);
+        const subElem = document.getElementById(`pStage${idx + 1}Sub`);
+        if (valElem) valElem.textContent = stg.value;
+        if (subElem) subElem.textContent = stg.subtext;
+      }
+    });
+
+    // ------------------------------------------------------------------------
+    // TAB 2: HARDWARE ARCHITECTURE DIAGRAM
+    // ------------------------------------------------------------------------
+    document.getElementById('hwTextIRLeft').textContent = leftIR === 1 ? 'Digital: 1 (Line)' : 'Digital: 0 (Soil)';
+    document.getElementById('hwTextIRRight').textContent = rightIR === 1 ? 'Digital: 1 (Line)' : 'Digital: 0 (Soil)';
+    document.getElementById('hwNodeIRLeft').style.stroke = leftIR === 1 ? '#22c55e' : '#06b6d4';
+    document.getElementById('hwNodeIRRight').style.stroke = rightIR === 1 ? '#22c55e' : '#06b6d4';
+    document.getElementById('hwTextL298N').textContent = `ENA: ${robot.leftMotor.speed} | ENB: ${robot.rightMotor.speed}`;
+    document.getElementById('hwTextMotorL').textContent = `${robot.leftMotor.rpm} RPM (${robot.leftMotor.direction})`;
+    document.getElementById('hwTextMotorR').textContent = `${robot.rightMotor.rpm} RPM (${robot.rightMotor.direction})`;
+    document.getElementById('hwTextUltrasonic').textContent = `Sonar: ${ultrasonicDistCm.toFixed(1)} cm`;
+
+    // ------------------------------------------------------------------------
+    // TAB 3: ESP32 PINOUT SIMULATION
+    // ------------------------------------------------------------------------
+    const allPinKeys = [...leftPinKeys, ...rightPinKeys];
+    allPinKeys.forEach(key => {
+      const p = hwModel.espPins[key];
+      const row = document.getElementById(`pinRow_${key}`);
+      const led = document.getElementById(`pinLed_${key}`);
+      if (row && led) {
+        row.className = `esp-pin-row ${p.state === 'HIGH' ? 'active-pin' : (p.state === 'PWM' ? 'active-pwm' : (p.state === 'WARN' ? 'active-warn' : ''))}`;
+        let ledClass = '';
+        if (p.state === 'HIGH') ledClass = 'led-green';
+        else if (p.state === 'PWM') ledClass = 'led-cyan';
+        else if (p.state === 'WARN') ledClass = 'led-red';
+        else if (p.type === 'PWR_IN' || p.type === 'PWR_OUT') ledClass = 'led-green';
+        led.className = `esp-pin-led ${ledClass}`;
+      }
+    });
+
+    // ------------------------------------------------------------------------
+    // TAB 4: L298N MOTOR DRIVER
+    // ------------------------------------------------------------------------
+    document.getElementById('l298nLeftDir').textContent = robot.leftMotor.direction;
+    document.getElementById('l298nRightDir').textContent = robot.rightMotor.direction;
+    document.getElementById('tachRpmLeft').textContent = robot.leftMotor.rpm;
+    document.getElementById('tachRpmRight').textContent = robot.rightMotor.rpm;
+    document.getElementById('l298nEnaDuty').textContent = `${Math.round((robot.leftMotor.speed / 255) * 100)}% (PWM ${robot.leftMotor.speed})`;
+    document.getElementById('l298nEnbDuty').textContent = `${Math.round((robot.rightMotor.speed / 255) * 100)}% (PWM ${robot.rightMotor.speed})`;
+    document.getElementById('l298nLeftVolt').textContent = `${hwModel.l298n.leftVoltage.toFixed(1)} V`;
+    document.getElementById('l298nRightVolt').textContent = `${hwModel.l298n.rightVoltage.toFixed(1)} V`;
+
+    // Logic Table
+    document.getElementById('tblENA').textContent = robot.leftMotor.speed;
+    document.getElementById('tblENB').textContent = robot.rightMotor.speed;
+    document.getElementById('tblIN1').textContent = hwModel.l298n.in1;
+    document.getElementById('tblIN2').textContent = hwModel.l298n.in2;
+    document.getElementById('tblIN3').textContent = hwModel.l298n.in3;
+    document.getElementById('tblIN4').textContent = hwModel.l298n.in4;
+    document.getElementById('tblMode').textContent = robot.controller.decision;
+
+    // ------------------------------------------------------------------------
+    // TAB 5: OOP ARCHITECTURE & LIVE TRACE
+    // ------------------------------------------------------------------------
+    document.getElementById('oopAttrSpeed').textContent = robot.speed.toFixed(1);
+    document.getElementById('oopAttrDir').textContent = robot.direction;
+    document.getElementById('oopAttrStatus').textContent = robot.status;
+    document.getElementById('oopAttrSensorVal').textContent = `[${leftIR}, ${rightIR}]`;
+    document.getElementById('oopAttrSensorData').textContent = `[${leftIR}, ${rightIR}, ${ultrasonicDistCm.toFixed(0)}cm]`;
+    document.getElementById('oopAttrMotorSpeed').textContent = `L:${robot.leftMotor.speed} R:${robot.rightMotor.speed}`;
+    document.getElementById('oopAttrMotorDir').textContent = `L:${robot.leftMotor.direction} R:${robot.rightMotor.direction}`;
+
+    // Highlight active method call
+    document.getElementById('oopMethodMove').classList.toggle('active-method', robot.lastMethodCalled === 'move');
+    document.getElementById('oopMethodReadSensor').classList.toggle('active-method', robot.leftSensor.lastMethodCalled === 'readSensor');
+    document.getElementById('oopMethodProcessInput').classList.toggle('active-method', robot.controller.lastMethodCalled === 'processInput');
+    document.getElementById('oopMethodDecideMovement').classList.toggle('active-method', robot.controller.lastMethodCalled === 'decideMovement');
+
+    // OOP Trace List
+    if (robot.activeCallTrace && robot.activeCallTrace.length > 0) {
+      const traceBox = document.getElementById('oopTraceList');
+      traceBox.innerHTML = '';
+      robot.activeCallTrace.slice(-5).forEach(tr => {
+        const item = document.createElement('div');
+        item.className = 'trace-item';
+        item.innerHTML = `
+          <span class="trace-time">${String(Math.floor(robot.elapsedSeconds)).padStart(2, '0')}s</span>
+          <span class="trace-class">${tr.className}</span>
+          <span class="trace-method">${tr.method}</span>
+          <span class="trace-params">${JSON.stringify(tr.params)}</span>
+        `;
+        traceBox.appendChild(item);
+      });
+    }
+
+    // ------------------------------------------------------------------------
+    // TAB 6: FLOWCHART SYNCHRONIZER
+    // ------------------------------------------------------------------------
+    document.querySelectorAll('.fc-node').forEach(node => {
+      node.classList.toggle('active-fc-node', node.id === fcState.activeNodeId);
+    });
+    document.getElementById('fcCurrentStepLabel').textContent = `Current Step: ${fcState.activeNodeId.replace('fc-', '').toUpperCase()}`;
+  }
+
+  // ==========================================================================
+  // MAIN ANIMATION LOOP (60 FPS)
+  // ==========================================================================
+  function mainLoop(currentTimestamp) {
+    const rawDelta = (currentTimestamp - lastTimestamp) / 1000;
+    lastTimestamp = currentTimestamp;
+
+    // Fixed timestep clamp
+    const dt = Math.min(0.05, Math.max(0.001, rawDelta)) * simSpeedMultiplier;
+
+    // 1. Simulation Step
+    updateSimulation(dt);
+
+    // 2. Draw Agricultural Field & Track
+    track.draw(ctx);
+
+    // 3. Draw Robot & Sensors
+    visualizer.draw(ctx, track, ultrasonicDistCm);
+
+    requestAnimationFrame(mainLoop);
+  }
+
+  // Start the RAF loop
+  requestAnimationFrame(mainLoop);
+});
+
+
+</script>
+</body>
+</html>
